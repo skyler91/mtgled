@@ -1,64 +1,64 @@
 .tableCenter {
-	height: 60px;
-	width: 120px;
+	height: 360px;
+	width: 720px;
 	background-color: #CBC3E3;
 	position: fixed;
-	top: 50px;
-	left: 100px;
+	top: 300px;
+	left: 600px;
 }
 
 .tableOuterCenter {
-    height: 80px;
-    width: 120px;
+    height: 480px;
+    width: 720px;
     background-color: black;
     position: fixed;
-    top: 40px;
-    left: 100px;
+    top: 240px;
+    left: 600px;
 }
 
 .leftCircle {
-	height: 60px;
-	width: 60px;
+	height: 360px;
+	width: 360px;
 	background-color: #CBC3E3;
 	border-radius: 50%;
 	position: fixed;
-	top: 50px;
-	left: 70px;
+	top: 300px;
+	left: 420px;
 }
 
 .outerLeftCircle {
-    height: 80px;
-    width: 80px;
+    height: 480px;
+    width: 480px;
     background-color: black;
     border-radius: 50%;
     position: fixed;
-    top: 40px;
-    left: 60px;
+    top: 240px;
+    left: 360px;
 }
 
 .rightCircle {
-	height: 60px;
-	width: 60px;
+	height: 360px;
+	width: 360px;
 	background-color: #CBC3E3;
 	border-radius: 50%;
 	position: fixed;
-	top: 50px;
-	left: 190px;
+	top: 300px;
+	left: 1140px;
 }
 
 .outerRightCircle {
-    height: 80px;
-    width: 80px;
+    height: 480px;
+    width: 480px;
     background-color: black;
     border-radius: 50%;
     position: fixed;
-    top: 40px;
-    left: 180px;
+    top: 240px;
+    left: 1080px;
 }
 
 .led {
-	height: 2px;
-	width: 2px;
+	height: 4px;
+	width: 4px;
 	background-color: red;
 	position: fixed;
     left: 50%;

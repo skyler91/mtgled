@@ -71,12 +71,14 @@ function createLed(top, left, size) {
 
 function mtgLogo() {
     var parent = document.getElementById('mtgTable');
+    var tableCenter = document.getElementById('mtgTableCenter').getBoundingClientRect();
     const img = document.createElement('img');
     img.src = 'mtgtableart.png';
-    img.style.height = 50;
-    img.style.width = 50;
-    img.style.top = 55;
-    img.style.left = 135;
+    img.style.height = tableCenter.height * 0.8;
+    img.style.width = tableCenter.height * 0.8;
+    img.style.top = tableCenter.top + tableCenter.height * .1;
+    img.style.left = tableCenter.left + tableCenter.width / 2 - (tableCenter.height * 0.8 / 2);
+    console.log("left=" + img.style.left);
     img.style.position = 'fixed';
     img.style.zIndex = 1;
     parent.appendChild(img);
