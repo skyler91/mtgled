@@ -1,3 +1,6 @@
+const numLeds = 150
+const numPlayers = 6
+
 function getLeds() {
     var element = document.getElementById('mtgTableCenter').getBoundingClientRect();
     console.info("top: " + element.top + " left: " + element.left);
@@ -11,9 +14,10 @@ function getLeds() {
 
 function centerLeds(mtgTable) {
     var parent = document.getElementById('mtgTable');
-    for (i = 0; i < 10; i++) {
-        parent.appendChild(createLed(mtgTable.top, mtgTable.left + mtgTable.width / 10 * i));
-        parent.appendChild(createLed(mtgTable.bottom, mtgTable.left + mtgTable.width / 10 * i));
+    const sideLeds = numLeds/3 - 1;
+    for (i = 0; i < sideLeds; i++) {
+        parent.appendChild(createLed(mtgTable.top, mtgTable.left + mtgTable.width / sideLeds * i));
+        parent.appendChild(createLed(mtgTable.bottom, mtgTable.left + mtgTable.width / sideLeds * i));
     }
 
     parent.appendChild(createLed(mtgTable.top, mtgTable.right));
@@ -21,25 +25,27 @@ function centerLeds(mtgTable) {
 }
 
 function leftLeds() {
+    const curveLeds = numLeds / 6;
     var parent = document.getElementById('mtgTable');
     var leftCircle = document.getElementById('mtgTableLeft').getBoundingClientRect();
     console.info(leftCircle.left);
     var centerX = leftCircle.left + leftCircle.width / 2;
     var centerY = leftCircle.top + leftCircle.height / 2;
     console.info("X=" + centerX + " Y=" + centerY);
-    for (i = 1; i < 10; i++) {
-        coords = findPointOnCircle(centerX, centerY, leftCircle.width / 2, Math.PI/10 * i + Math.PI/2);
+    for (i = 1; i < curveLeds; i++) {
+        coords = findPointOnCircle(centerX, centerY, leftCircle.width / 2, Math.PI/curveLeds * i + Math.PI/2);
         parent.appendChild(createLed(coords.y, coords.x));
     }
 }
 
 function rightLeds() {
+    const curveLeds = numLeds / 6;
     var parent = document.getElementById('mtgTable');
     var rightCircle = document.getElementById('mtgTableRight').getBoundingClientRect();
     var centerX = rightCircle.left + rightCircle.width/2;
     var centerY = rightCircle.top + rightCircle.height/2;
-    for (i = 1; i < 10; i++) {
-        coords = findPointOnCircle(centerX, centerY, rightCircle.width / 2, Math.PI/10 * i - Math.PI/2);
+    for (i = 1; i < curveLeds; i++) {
+        coords = findPointOnCircle(centerX, centerY, rightCircle.width / 2, Math.PI/curveLeds * i - Math.PI/2);
         parent.appendChild(createLed(coords.y, coords.x));
     }
 }
@@ -65,11 +71,8 @@ function createLed(top, left, size) {
 
 function mtgLogo() {
     var parent = document.getElementById('mtgTable');
-    var center = document.getElementById('mtgTableCenter');
-    const div = document.createElement('div');
     const img = document.createElement('img');
-    img.src = 'mtglogo.png';
-    div.appendChild(img);
+    img.src = 'mtgtableart.png';
     img.style.height = 50;
     img.style.width = 50;
     img.style.top = 55;
