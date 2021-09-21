@@ -1,3 +1,11 @@
+.tableOuterCenter {
+    height: 480px;
+    width: 640px;
+    background-color: black;
+    position: fixed;
+    left: 600px;
+}
+
 .tableCenter {
 	height: 360px;
 	width: 640px;
@@ -7,12 +15,13 @@
 	left: 600px;
 }
 
-.tableOuterCenter {
+.outerLeftCircle {
     height: 480px;
-    width: 640px;
+    width: 480px;
     background-color: black;
+    border-radius: 50%;
     position: fixed;
-    left: 600px;
+    left: 360px;
 }
 
 .leftCircle {
@@ -25,13 +34,13 @@
 	left: 420px;
 }
 
-.outerLeftCircle {
+.outerRightCircle {
     height: 480px;
     width: 480px;
     background-color: black;
     border-radius: 50%;
     position: fixed;
-    left: 360px;
+    left: 1000px;
 }
 
 .rightCircle {
@@ -42,15 +51,6 @@
 	position: fixed;
 	top: 60px;
 	left: 1060px;
-}
-
-.outerRightCircle {
-    height: 480px;
-    width: 480px;
-    background-color: black;
-    border-radius: 50%;
-    position: fixed;
-    left: 1000px;
 }
 
 .led {

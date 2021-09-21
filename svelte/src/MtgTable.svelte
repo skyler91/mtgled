@@ -1,3 +1,8 @@
+<script>
+import { onMount } from 'svelte';
+
+let mtgTable, mtgTableLeft, mtgTableRight;
+
 const maxLeds = 148;
 const maxPlayers = 6;
 let currentPlayers = [1,2,3,4,5,6];
@@ -5,13 +10,17 @@ const leds = [];
 let currPlayer = 0;
 
 function getLeds() {
-    var element = document.getElementById('mtgTableCenter').getBoundingClientRect();
-    topLeds(element);
-    rightLeds(document.getElementById('mtgTableRight').getBoundingClientRect());
-    bottomLeds(element);
-    leftLeds(document.getElementById('mtgTableLeft').getBoundingClientRect());
-    mtgLogo(element);
+    console.info(`element: ${mtgTable}`);
+    topLeds(mtgTable.getBoundingClientRect());
+    rightLeds(mtgTableRight.getBoundingClientRect());
+    bottomLeds(mtgTable.getBoundingClientRect());
+    leftLeds(mtgTableLeft.getBoundingClientRect());
+    //mtgLogo(mtgTable.getBoundingClientRect());
 }
+
+onMount(() => {
+    getLeds()
+});
 
 function newGame(players) {
     resetLeds();
@@ -20,14 +29,14 @@ function newGame(players) {
 
 function topLeds(parentRect) {
     const sideLeds = maxLeds / 3;
-    for (i = 0; i < sideLeds; i++) {
+    for (let i = 0; i < sideLeds; i++) {
         createLed(parentRect.top, parentRect.left + parentRect.width / sideLeds * i, i <= sideLeds / 2 ? 1 : 2);
     }
 }
 
 function bottomLeds(parentRect) {
     const sideLeds = maxLeds / 3;
-    for (i = sideLeds; i >= 0; i--) {
+    for (let i = sideLeds; i >= 0; i--) {
         createLed(parentRect.bottom, parentRect.left + parentRect.width / sideLeds * i, i <= sideLeds / 2 ? 5: 4);
     }
 }
@@ -36,7 +45,7 @@ function leftLeds(parentRect) {
     const curveLeds = maxLeds / 6;
     var centerX = parentRect.left + parentRect.width / 2;
     var centerY = parentRect.top + parentRect.height / 2;
-    for (i = 1; i < curveLeds; i++) {
+    for (let i = 1; i < curveLeds; i++) {
         const coords = findPointOnCircle(centerX, centerY, parentRect.width / 2, Math.PI/curveLeds * i + Math.PI/2);
         createLed(coords.y, coords.x, 6);
     }
@@ -46,7 +55,7 @@ function rightLeds(parentRect) {
     const curveLeds = maxLeds / 6;
     var centerX = parentRect.left + parentRect.width/2;
     var centerY = parentRect.top + parentRect.height/2;
-    for (i = 1; i < curveLeds; i++) {
+    for (let i = 1; i < curveLeds; i++) {
         const coords = findPointOnCircle(centerX, centerY, parentRect.width / 2, Math.PI/curveLeds * i - Math.PI/2);
         createLed(coords.y, coords.x, 3);
     }
@@ -60,7 +69,6 @@ function findPointOnCircle(centerX, centerY, radius, angleRadians) {
 }
 
 function createLed(top, left, player_id, size=4) {
-    const mtgTable = document.getElementById('mtgTable');
     let led = document.createElement('div');
     led.className = 'led';
     led.style.left = left;
@@ -79,12 +87,12 @@ function mtgLogo() {
     var parent = document.getElementById('mtgTable');
     var tableCenter = document.getElementById('mtgTableCenter').getBoundingClientRect();
     const img = document.createElement('img');
-    img.src = 'mtgtableart.png';
+    img.src = 'img/mtgtableart.png';
     img.style.height = tableCenter.height * 0.8;
     img.style.width = tableCenter.height * 0.8;
-    img.style.top = tableCenter.top + tableCenter.height * .1;
-    img.style.left = tableCenter.left + tableCenter.width / 2 - (tableCenter.height * 0.8 / 2);
-    img.style.position = 'fixed';
+    //img.style.top = tableCenter.top + tableCenter.height * .1;
+    //img.style.left = tableCenter.left + tableCenter.width / 2 - (tableCenter.height * 0.8 / 2);
+    img.style.position = 'absolute';
     img.style.zIndex = 1;
     parent.appendChild(img);
 }
@@ -100,16 +108,6 @@ function nextTurn() {
     leds.filter(l => l.playerId == currPlayer).forEach(l => {
         console.info('Setting to green');
         l.element.style.backgroundColor = 'green'
-    });
-    
-}
-
-async function playAnimation(playerId) {
-    playerLeds = leds.filter(l => l.playerId == playerId).forEach(l => {
-        const color = randomColor();
-        console.info(`Setting color to ${color}`);
-        l.element.style.backgroundColor = 'yellow';
-        pause(50);
     });
 }
 
@@ -136,3 +134,97 @@ class Led {
         this.playerId = playerId;
     }
 }
+</script>
+
+<main>
+    <div bind:this={mtgTable} id="mtgTable">
+        <div class="tableOuterCenter">
+            <div class="outerLeftCircle">
+                <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft"></div>
+            </div>
+            <div class="outerRightCircle">
+                <div class="rightCircle" bind:this={mtgTableRight} id="mtgTableRight"></div>
+            </div>
+            <div class="tableCenter" id="mtgTableCenter">
+                <div class="mtgLogo"><img src="img/mtgtableart.png" alt="art"/></div>
+            </div>
+        </div>
+    </div>
+
+    <br /><br />
+    <button type="button" onClick="nextTurn();">Ring!</button>
+</main>
+
+<style>
+.tableOuterCenter {
+    height: 480px;
+    width: 640px;
+    background-color: black;
+    position: relative;
+    left: 600px;
+}
+
+.tableCenter {
+	height: 360px;
+	width: 640px;
+	background-color: #CBC3E3;
+	position: absolute;
+	top: 60px;
+}
+
+.outerLeftCircle {
+    height: 480px;
+    width: 480px;
+    background-color: black;
+    border-radius: 50%;
+    position: absolute;
+    left: -240px;
+}
+
+.leftCircle {
+	height: 360px;
+	width: 360px;
+	background-color: #CBC3E3;
+	border-radius: 50%;
+	position: absolute;
+	top: 60px;
+	left: 60px;
+}
+
+.outerRightCircle {
+    height: 480px;
+    width: 480px;
+    background-color: black;
+    border-radius: 50%;
+    position: absolute;
+    left: 400px;
+}
+
+.rightCircle {
+	height: 360px;
+	width: 360px;
+	background-color: #CBC3E3;
+	border-radius: 50%;
+	position: absolute;
+	top: 60px;
+	left: 60px;
+}
+
+.mtgLogo {
+    height: 288px;
+    width: 288px;
+    position: absolute;
+    top: 36px;
+    left: 176px;
+}
+
+.led {
+	height: 4px;
+	width: 4px;
+	background-color: red;
+	position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
