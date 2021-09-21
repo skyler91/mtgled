@@ -3,9 +3,6 @@ const numPlayers = 6
 
 function getLeds() {
     var element = document.getElementById('mtgTableCenter').getBoundingClientRect();
-    console.info("top: " + element.top + " left: " + element.left);
-    console.info("bottom: " + element.bottom + " right: " + element.right);
-    console.info('width: ' + element.width);
     centerLeds(element);
     leftLeds();
     rightLeds();
@@ -28,10 +25,8 @@ function leftLeds() {
     const curveLeds = numLeds / 6;
     var parent = document.getElementById('mtgTable');
     var leftCircle = document.getElementById('mtgTableLeft').getBoundingClientRect();
-    console.info(leftCircle.left);
     var centerX = leftCircle.left + leftCircle.width / 2;
     var centerY = leftCircle.top + leftCircle.height / 2;
-    console.info("X=" + centerX + " Y=" + centerY);
     for (i = 1; i < curveLeds; i++) {
         coords = findPointOnCircle(centerX, centerY, leftCircle.width / 2, Math.PI/curveLeds * i + Math.PI/2);
         parent.appendChild(createLed(coords.y, coords.x));
@@ -78,7 +73,6 @@ function mtgLogo() {
     img.style.width = tableCenter.height * 0.8;
     img.style.top = tableCenter.top + tableCenter.height * .1;
     img.style.left = tableCenter.left + tableCenter.width / 2 - (tableCenter.height * 0.8 / 2);
-    console.log("left=" + img.style.left);
     img.style.position = 'fixed';
     img.style.zIndex = 1;
     parent.appendChild(img);
