@@ -1,62 +1,67 @@
 <script>
 import { onMount } from 'svelte';
+import LED from './LED.svelte';
 
-let mtgTable, mtgTableLeft, mtgTableRight;
+let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
 
 const maxLeds = 148;
 const maxPlayers = 6;
 let currentPlayers = [1,2,3,4,5,6];
-const leds = [];
+let leds = [];
 let currPlayer = 0;
 
-function getLeds() {
-    console.info(`element: ${mtgTable}`);
-    topLeds(mtgTable.getBoundingClientRect());
-    rightLeds(mtgTableRight.getBoundingClientRect());
-    bottomLeds(mtgTable.getBoundingClientRect());
-    leftLeds(mtgTableLeft.getBoundingClientRect());
-    //mtgLogo(mtgTable.getBoundingClientRect());
-}
-
 onMount(() => {
-    getLeds()
+    addLeds();
 });
+
+function addLeds() {
+    topLeds();
+    rightLeds();
+    bottomLeds();
+    leftLeds();
+
+    leds = leds;
+}
 
 function newGame(players) {
     resetLeds();
     currentPlayers = players;
 }
 
-function topLeds(parentRect) {
+function topLeds() {
     const sideLeds = maxLeds / 3;
+    const tableRect = mtgTableCenter.getBoundingClientRect();
     for (let i = 0; i < sideLeds; i++) {
-        createLed(parentRect.top, parentRect.left + parentRect.width / sideLeds * i, i <= sideLeds / 2 ? 1 : 2);
+        createLed(0, tableRect.width / sideLeds * i, i <= sideLeds / 2 ? 1 : 2);
     }
 }
 
-function bottomLeds(parentRect) {
+function bottomLeds() {
     const sideLeds = maxLeds / 3;
+    const tableRect = mtgTableCenter.getBoundingClientRect();
     for (let i = sideLeds; i >= 0; i--) {
-        createLed(parentRect.bottom, parentRect.left + parentRect.width / sideLeds * i, i <= sideLeds / 2 ? 5: 4);
+        createLed(tableRect.height, tableRect.width / sideLeds * i, i <= sideLeds / 2 ? 5: 4);
     }
 }
 
-function leftLeds(parentRect) {
+function leftLeds() {
     const curveLeds = maxLeds / 6;
-    var centerX = parentRect.left + parentRect.width / 2;
-    var centerY = parentRect.top + parentRect.height / 2;
+    const leftRect = mtgTableLeft.getBoundingClientRect();
+    var centerX = leftRect.width / 2;
+    var centerY = leftRect.height / 2;
     for (let i = 1; i < curveLeds; i++) {
-        const coords = findPointOnCircle(centerX, centerY, parentRect.width / 2, Math.PI/curveLeds * i + Math.PI/2);
+        const coords = findPointOnCircle(centerX, centerY, leftRect.width / 2, Math.PI/curveLeds * i + Math.PI/2);
         createLed(coords.y, coords.x, 6);
     }
 }
 
-function rightLeds(parentRect) {
+function rightLeds() {
     const curveLeds = maxLeds / 6;
-    var centerX = parentRect.left + parentRect.width/2;
-    var centerY = parentRect.top + parentRect.height/2;
+    const rightRect = mtgTableRight.getBoundingClientRect();
+    var centerX = rightRect.width/2;
+    var centerY = rightRect.height/2;
     for (let i = 1; i < curveLeds; i++) {
-        const coords = findPointOnCircle(centerX, centerY, parentRect.width / 2, Math.PI/curveLeds * i - Math.PI/2);
+        const coords = findPointOnCircle(centerX, centerY, rightRect.width / 2, Math.PI/curveLeds * i - Math.PI/2);
         createLed(coords.y, coords.x, 3);
     }
 }
@@ -68,33 +73,16 @@ function findPointOnCircle(centerX, centerY, radius, angleRadians) {
     return {'x': newX, 'y': newY};
 }
 
-function createLed(top, left, player_id, size=4) {
-    let led = document.createElement('div');
-    led.className = 'led';
-    led.style.left = left;
-    led.style.top = top;
-    if (size) {
-        led.style.width = size;
-        led.style.height = size;
-    }
-
-    led = mtgTable.appendChild(led);
-    leds.push(new Led(led, player_id))
-    return led;
-}
-
-function mtgLogo() {
-    var parent = document.getElementById('mtgTable');
-    var tableCenter = document.getElementById('mtgTableCenter').getBoundingClientRect();
-    const img = document.createElement('img');
-    img.src = 'img/mtgtableart.png';
-    img.style.height = tableCenter.height * 0.8;
-    img.style.width = tableCenter.height * 0.8;
-    //img.style.top = tableCenter.top + tableCenter.height * .1;
-    //img.style.left = tableCenter.left + tableCenter.width / 2 - (tableCenter.height * 0.8 / 2);
-    img.style.position = 'absolute';
-    img.style.zIndex = 1;
-    parent.appendChild(img);
+function createLed(top, left, player_id, color="red", size=4) {
+    const led = {
+        top: top,
+        left: left,
+        player_id: player_id,
+        color: color,
+        size: size
+    };
+    // console.info(`created LED: ${JSON.stringify(led)}`);
+    leds.push(led);
 }
 
 function nextTurn() {
@@ -127,26 +115,30 @@ function randomColor() {
 function resetLeds() {
     leds.forEach(l => l.element.style.backgroundColor = "red");
 }
-
-class Led {
-    constructor(element, playerId) {
-        this.element = element;
-        this.playerId = playerId;
-    }
-}
 </script>
 
 <main>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
             <div class="outerLeftCircle">
-                <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft"></div>
+                <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
+                    {#each leds.filter(l => l.player_id === 6) as {top, left, player_id, color, size}}
+                        <LED top={top} left={left} color={color} player_id={player_id} size={size} />
+                    {/each}
+                </div>
             </div>
             <div class="outerRightCircle">
-                <div class="rightCircle" bind:this={mtgTableRight} id="mtgTableRight"></div>
+                <div class="rightCircle" bind:this={mtgTableRight} id="mtgTableRight">
+                    {#each leds.filter(l => l.player_id === 3) as {top, left, player_id, color, size}}
+                        <LED top={top} left={left} color={color} player_id={player_id} size={size} />
+                    {/each}
+                </div>
             </div>
-            <div class="tableCenter" id="mtgTableCenter">
+            <div class="tableCenter" bind:this={mtgTableCenter} id="mtgTableCenter">
                 <div class="mtgLogo"><img src="img/mtgtableart.png" alt="art"/></div>
+                {#each leds.filter(l => [1,2,4,5].includes(l.player_id)) as {top, left, player_id, color, size}}
+                <LED top={top} left={left} color={color} player_id={player_id} size={size} />
+                {/each}
             </div>
         </div>
     </div>
@@ -221,10 +213,7 @@ class Led {
 .led {
 	height: 4px;
 	width: 4px;
-	background-color: red;
-	position: fixed;
-    left: 50%;
-    top: 50%;
+	position: absolute;
     transform: translate(-50%, -50%);
 }
 </style>
