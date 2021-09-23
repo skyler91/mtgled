@@ -1,7 +1,7 @@
 <script>
-    export let top;
-    export let left;
-    export let player_id, color, size;
+    export let color = red;
+    export let coords;
+    export let visible;
 </script>
 
 <style>
@@ -13,4 +13,6 @@
 }
 </style>
 
-<div class="led" style="top:{top}px; left:{left}px; background-color:{color};"></div>
+{#if visible}
+<div class="led" style="top:{coords.y}px; left:{coords.x}px; background-color:{color};"></div>
+{/if}

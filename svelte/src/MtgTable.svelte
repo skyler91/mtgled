@@ -75,14 +75,16 @@ function findPointOnCircle(centerX, centerY, radius, angleRadians) {
 
 function createLed(top, left, player_id, color="red", size=4) {
     const led = {
-        top: top,
-        left: left,
+        coords: {
+            x: left,
+            y: top
+        },
         player_id: player_id,
         color: color,
-        size: size
+        size: size,
+        visible: false
     };
-    // console.info(`created LED: ${JSON.stringify(led)}`);
-    leds.push(led);
+    leds = [...leds, led];
 }
 
 function nextTurn() {
@@ -93,18 +95,14 @@ function nextTurn() {
     } while (!currentPlayers.includes(currPlayer));
 
     console.info(`Player ${currPlayer}'s turn!`);
-    leds.filter(l => l.playerId == currPlayer).forEach(l => {
-        console.info('Setting to green');
-        l.element.style.backgroundColor = 'green'
+    leds.forEach(l => {
+        if (l.player_id === currPlayer)
+        {
+            l.color = 'red';
+            l.visible = true;
+        }
     });
-}
-
-function pause(millis) {
-    var date = Date.now();
-    var curDate = null;
-    do {
-        curDate = Date.now();
-    } while (curDate - date < millis);
+    leds = leds;
 }
 
 function randomColor() {
@@ -113,7 +111,7 @@ function randomColor() {
 
 // reset all LEDs to red
 function resetLeds() {
-    leds.forEach(l => l.element.style.backgroundColor = "red");
+    leds.forEach(l => l.visible = false);
 }
 </script>
 
@@ -122,29 +120,29 @@ function resetLeds() {
         <div class="tableOuterCenter">
             <div class="outerLeftCircle">
                 <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
-                    {#each leds.filter(l => l.player_id === 6) as {top, left, player_id, color, size}}
-                        <LED top={top} left={left} color={color} player_id={player_id} size={size} />
+                    {#each leds.filter(l => l.player_id === 6) as led}
+                        <LED coords={led.coords} color={led.color} visible={led.visible} />
                     {/each}
                 </div>
             </div>
             <div class="outerRightCircle">
                 <div class="rightCircle" bind:this={mtgTableRight} id="mtgTableRight">
-                    {#each leds.filter(l => l.player_id === 3) as {top, left, player_id, color, size}}
-                        <LED top={top} left={left} color={color} player_id={player_id} size={size} />
+                    {#each leds.filter(l => l.player_id === 3) as led}
+                        <LED coords={led.coords} color={led.color} visible={led.visible} />
                     {/each}
                 </div>
             </div>
             <div class="tableCenter" bind:this={mtgTableCenter} id="mtgTableCenter">
                 <div class="mtgLogo"><img src="img/mtgtableart.png" alt="art"/></div>
-                {#each leds.filter(l => [1,2,4,5].includes(l.player_id)) as {top, left, player_id, color, size}}
-                <LED top={top} left={left} color={color} player_id={player_id} size={size} />
+                {#each leds.filter(l => [1,2,4,5].includes(l.player_id)) as led}
+                <LED coords={led.coords} color={led.color} visible={led.visible} />
                 {/each}
             </div>
         </div>
     </div>
 
     <br /><br />
-    <button type="button" onClick="nextTurn();">Ring!</button>
+    <button type="button" on:click="{nextTurn}">Next Turn</button>
 </main>
 
 <style>
@@ -208,12 +206,5 @@ function resetLeds() {
     position: absolute;
     top: 36px;
     left: 176px;
-}
-
-.led {
-	height: 4px;
-	width: 4px;
-	position: absolute;
-    transform: translate(-50%, -50%);
 }
 </style>
