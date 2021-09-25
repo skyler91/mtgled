@@ -22,7 +22,7 @@ function connectWebSocket() {
     socket.addEventListener('message', function(event) {
         const data = event.data;
         const json_data = JSON.parse(data)
-        console.info(`data: ${JSON.stringify(json_data)}`)
+        // console.info(`data: ${JSON.stringify(json_data)}`)
         json_data.forEach((element, index) => {
             leds[index].color = `rgb(${element.r},${element.g},${element.b})`
         });

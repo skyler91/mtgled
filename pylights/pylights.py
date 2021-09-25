@@ -45,11 +45,11 @@ class LightsWebSocket(tornado.websocket.WebSocketHandler):
 
     def open(self):
         clients.append(self)
-        print("WebSocket opened")
+        print(f"WebSocket opened from {self.request.host}")
     
-    def on_message(self, message):
-        print(f"Received message: {message}")
-        self.write_message(f'You said: {message}')
+    # def on_message(self, message):
+    #     print(f"Received message: {message}")
+    #     self.write_message(f'You said: {message}')
     
     def on_close(self):
         clients.remove(self)
@@ -72,7 +72,7 @@ def light_changer() :
         print(f'changing lights')
         pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(lights)}')
         num += 1
-        time.sleep(5)
+        time.sleep(0.5)
         
 def serve() :
     asyncio.set_event_loop(asyncio.new_event_loop())
@@ -80,14 +80,14 @@ def serve() :
         event = sub_socket.recv().decode('utf-8').split()
         topic = event[0]
         message = ''.join(event[1:])
-        print(f'sending light change to websocket!!!!!!!!!')
+        # print(f'sending light change to websocket!!!!!!!!!')
         send_to_websocket(message)
 
 def send_to_websocket(message):
     for client in clients:
-        print('writing message to client')
+        # print('writing message to client')
         client.write_message(message)
-        print('wrote message to client')
+        # print('wrote message to client')
 
 def start_tornado():
     asyncio.set_event_loop(asyncio.new_event_loop())
@@ -99,8 +99,6 @@ def start_tornado():
 def main():
     t1 = Thread(target = light_changer)
     t2 = Thread(target = serve)
-    print('starting tornado loop')
-    #tornado.ioloop.IOLoop.current().start()
     t3 = Thread(target = start_tornado)
     t3.start()
     t1.start()
