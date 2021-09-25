@@ -1,6 +1,36 @@
 <script>
 import { onMount } from 'svelte';
+import { element } from 'svelte/internal';
 import LED from './LED.svelte';
+
+let statusMsg = 'Connecting...';
+
+function connectWebSocket() {
+    const socket = new WebSocket("ws://127.0.0.1:8756");
+    socket.addEventListener('open', function(event) {
+        console.info('Connected to WebSocket')
+        statusMsg = '';
+    });
+
+    socket.addEventListener('close', function(event) {
+        statusMsg = 'Connecting...'
+        setTimeout(function() {
+            connectWebSocket();
+        }, 1000);
+    })
+
+    socket.addEventListener('message', function(event) {
+        const data = event.data;
+        const json_data = JSON.parse(data)
+        console.info(`data: ${JSON.stringify(json_data)}`)
+        json_data.forEach((element, index) => {
+            leds[index].color = `rgb(${element.r},${element.g},${element.b})`
+        });
+        leds = leds
+    });
+}
+
+connectWebSocket();
 
 let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
 
@@ -82,7 +112,7 @@ function createLed(top, left, player_id, color="red", size=4) {
         player_id: player_id,
         color: color,
         size: size,
-        visible: false
+        visible: true
     };
     leds = [...leds, led];
 }
@@ -116,6 +146,7 @@ function resetLeds() {
 </script>
 
 <main>
+    <h1>{statusMsg}</h1>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
             <div class="outerLeftCircle">

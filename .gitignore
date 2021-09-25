@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+pylights/bin
+pylights/include
+pylights/lib
+pylights/lib64
+pylights/share
+pylights/pyvenv.cfg
