@@ -1,6 +1,5 @@
 <script>
 import { onMount } from 'svelte';
-import { element } from 'svelte/internal';
 import LED from './LED.svelte';
 
 let statusMsg = 'Connecting...';
@@ -9,11 +8,12 @@ function connectWebSocket() {
     const socket = new WebSocket("ws://127.0.0.1:8756");
     socket.addEventListener('open', function(event) {
         console.info('Connected to WebSocket')
-        statusMsg = '';
+        statusMsg = 'Connected';
     });
 
     socket.addEventListener('close', function(event) {
         statusMsg = 'Connecting...'
+        hideAllLeds();
         setTimeout(function() {
             connectWebSocket();
         }, 1000);
@@ -24,13 +24,12 @@ function connectWebSocket() {
         const json_data = JSON.parse(data)
         // console.info(`data: ${JSON.stringify(json_data)}`)
         json_data.forEach((element, index) => {
-            leds[index].color = `rgb(${element.r},${element.g},${element.b})`
+            leds[index].color = `rgb(${element.r},${element.g},${element.b})`;
+            leds[index].visible = true;
         });
         leds = leds
     });
 }
-
-connectWebSocket();
 
 let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
 
@@ -42,6 +41,7 @@ let currPlayer = 0;
 
 onMount(() => {
     addLeds();
+    connectWebSocket();
 });
 
 function addLeds() {
@@ -112,7 +112,7 @@ function createLed(top, left, player_id, color="red", size=4) {
         player_id: player_id,
         color: color,
         size: size,
-        visible: true
+        visible: false
     };
     leds = [...leds, led];
 }
@@ -132,6 +132,11 @@ function nextTurn() {
             l.visible = true;
         }
     });
+    leds = leds;
+}
+
+function hideAllLeds() {
+    leds.forEach(led => led.visible = false);
     leds = leds;
 }
 
