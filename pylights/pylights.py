@@ -22,6 +22,7 @@ sub_socket.connect('inproc://#1')
 
 
 clients = []
+global_lights = []
 define("port", default=8756, type=int)
 
 class Application(tornado.web.Application):
@@ -44,8 +45,10 @@ class LightsWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self):
+        global global_lights
         clients.append(self)
         print(f"WebSocket opened from {self.request.host}")
+        self.write_message(json.dumps(global_lights))
     
     # def on_message(self, message):
     #     print(f"Received message: {message}")
@@ -53,7 +56,7 @@ class LightsWebSocket(tornado.websocket.WebSocketHandler):
     
     def on_close(self):
         clients.remove(self)
-        print("WebSocket closed")
+        print(f"WebSocket closed from {self.request.host}")
 
 def init_random_lights(num_lights):
     lights = []
@@ -66,11 +69,12 @@ def init_random_lights(num_lights):
     return lights
 
 def light_changer() :
+    global global_lights
     num = 1
     while True:
-        lights = init_random_lights(148)
+        global_lights = init_random_lights(148)
         print(f'changing lights')
-        pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(lights)}')
+        pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(global_lights)}')
         num += 1
         time.sleep(0.5)
         
