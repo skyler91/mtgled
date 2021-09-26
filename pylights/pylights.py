@@ -165,10 +165,10 @@ def start_webserver():
 
 def main():
     init_lights()
-    # lights_thread = Thread(target = lights_random, args=[0.1])
+    lights_thread = Thread(target = lights_random, args=[0.1])
     # lights_thread = Thread(target = lights_on_sequential, args=[(255,0,0)])
     # lights_thread = Thread(target = lights_on_sequential_rgb)
-    lights_thread = Thread(target = blink_lights)
+    # lights_thread = Thread(target = blink_lights)
     queue_listener_thread = Thread(target = event_subscriber)
     webserver_thread = Thread(target = start_webserver)
 

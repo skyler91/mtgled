@@ -193,7 +193,7 @@ function resetLeds() {
     </div>
 
     <br /><br />
-    <button type="button" on:click="{nextTurn}">Next Turn</button>
+    <button type="button" on:click="{nextTurn}" style="visibility:hidden;">Next Turn</button>
 </main>
 
 <style>
