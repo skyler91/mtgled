@@ -3,10 +3,9 @@ import { onMount } from 'svelte';
 import LED from './LED.svelte';
 import { statusEnum, connectionStatus } from './stores.js';
 
-let hello = '';
-
 function connectWebSocket() {
-    const socket = new WebSocket("ws://127.0.0.1:8756/lightsocket");
+    const socketAddr = PYLIGHTS_ADDRESS || '127.0.0.1:8756';
+    const socket = new WebSocket(`ws://${PYLIGHTS_ADDRESS}/lightsocket`);
     socket.addEventListener('open', function(event) {
         console.info('Connected to WebSocket');
         $connectionStatus = statusEnum.CONNECTED;
@@ -44,20 +43,19 @@ let currPlayer = 0;
 onMount(() => {
     addLeds();
     connectWebSocket();
-    getHelloWorld();
 });
 
-async function getHelloWorld() {
-    console.info('fetching hello');
-    try {
-        const resp = await fetch('http://127.0.0.1:8756/api');
-        console.info(`got ${resp.status}`);
-        const json = await resp.json();
-        hello = await JSON.stringify(json);
-    } catch (exception) {
-        console.info(exception)
-    }
-}
+// async function getHelloWorld() {
+//     console.info('fetching hello');
+//     try {
+//         const resp = await fetch('http://127.0.0.1:8756/api');
+//         console.info(`got ${resp.status}`);
+//         const json = await resp.json();
+//         hello = await JSON.stringify(json);
+//     } catch (exception) {
+//         console.info(exception)
+//     }
+// }
 
 function addLeds() {
     topLeds();
@@ -155,10 +153,6 @@ function hideAllLeds() {
     leds = leds;
 }
 
-function randomColor() {
-    return `#${Math.floor(Math.random() * 16777215).toString(16)}`
-}
-
 // reset all LEDs to red
 function resetLeds() {
     leds.forEach(l => l.visible = false);
@@ -166,7 +160,6 @@ function resetLeds() {
 </script>
 
 <main>
-    <h2>{hello}</h2>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
             <div class="outerLeftCircle">

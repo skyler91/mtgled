@@ -4,7 +4,10 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import { config as configDotEnv } from 'dotenv';
+import replace from '@rollup/plugin-replace';
 
+configDotEnv();
 const production = !process.env.ROLLUP_WATCH;
 
 function serve() {
@@ -68,7 +71,12 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser(),
+
+		// Replace environment variables
+		replace({
+			PYLIGHTS_ADDRESS: JSON.stringify(process.env.PYLIGHTS_ADDRESS)
+		}),
 	],
 	watch: {
 		clearScreen: false
