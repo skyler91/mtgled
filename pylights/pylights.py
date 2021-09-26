@@ -10,6 +10,7 @@ import time
 import zmq
 
 LIGHTS_TOPIC = 'update_lights'
+NUM_LIGHTS = 148
 
 context = zmq.Context()
 pub_socket = context.socket(zmq.PUB)
@@ -69,31 +70,82 @@ class RestHandler(tornado.web.RequestHandler):
             'message': 'hello'
         }))
 
-def init_random_lights(num_lights):
-    lights = []
-    for num in range(num_lights):
-        lights.append({
-            'r': random.randint(0, 255),
-            'g': random.randint(0, 255),
-            'b': random.randint(0,255)
-        })
-    return lights
+def update_lights():
+    pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(global_lights)}')
 
-def light_changer() :
+def init_lights(rgb=(0,0,0)):
     global global_lights
-    num = 1
+    global_lights = []
+
+    for num in range(NUM_LIGHTS):
+        global_lights.append({
+            'r': rgb[0],
+            'g': rgb[1],
+            'b': rgb[2]
+        })
+
+# Set all lights to random colors
+def lights_random(delay=0.5) :
+    global global_lights
     while True:
-        global_lights = init_random_lights(148)
-        #print(f'changing lights')
-        pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(global_lights)}')
-        num += 1
-        time.sleep(0.5)
-        
-def serve() :
+        for light in global_lights:
+            light['r'] = random.randint(0,255)
+            light['g'] = random.randint(0,255)
+            light['b'] = random.randint(0,255)
+        update_lights()
+        time.sleep(delay)
+
+def lights_off() :
+    global global_lights
+    for light in global_lights:
+        light['r'] = 0
+        light['g'] = 0
+        light['b'] = 0
+    update_lights()
+
+# Light up one at a time sequentially
+def lights_on_sequential(rgb=(0,0,0), delay=0.03):
+    global global_lights
+    while True:
+        for i in range(len(global_lights)):
+            global_lights[i]['r'] = rgb[0]
+            global_lights[i]['g'] = rgb[1]
+            global_lights[i]['b'] = rgb[2]
+            global_lights[i-1]['r'] = 0
+            global_lights[i-1]['g'] = 0
+            global_lights[i-1]['b'] = 0
+            update_lights()
+            time.sleep(delay)
+
+# Light up sequentially as a train, cycle through colors
+def lights_on_sequential_rgb(delay=.02, colors = [(255,0,0),(0,255,0),(0,0,255)]):
+    global global_lights
+    while True:
+        for color in colors:
+            for light in global_lights:
+                light['r'] = color[0]
+                light['g'] = color[1]
+                light['b'] = color[2]
+                update_lights()
+                time.sleep(delay)
+
+# Blink all lights together
+def blink_lights(delay=0.5, color=(255,0,0)):
+    global global_lights
+    while True:
+        lights_off()
+        for light in global_lights:
+            light['r'] = color[0]
+            light['g'] = color[1]
+            light['b'] = color[2]
+        time.sleep(delay)
+        update_lights()
+        time.sleep(delay)
+
+def event_subscriber() :
     asyncio.set_event_loop(asyncio.new_event_loop())
     while (True) :
         event = sub_socket.recv().decode('utf-8').split()
-        topic = event[0]
         message = ''.join(event[1:])
         # print(f'sending light change to websocket!!!!!!!!!')
         send_to_websocket(message)
@@ -112,12 +164,17 @@ def start_webserver():
     tornado.ioloop.IOLoop.current().start()
 
 def main():
-    t1 = Thread(target = light_changer)
-    t2 = Thread(target = serve)
-    t3 = Thread(target = start_webserver)
-    t3.start()
-    t1.start()
-    t2.start()
+    init_lights()
+    # lights_thread = Thread(target = lights_random, args=[0.1])
+    # lights_thread = Thread(target = lights_on_sequential, args=[(255,0,0)])
+    # lights_thread = Thread(target = lights_on_sequential_rgb)
+    lights_thread = Thread(target = blink_lights)
+    queue_listener_thread = Thread(target = event_subscriber)
+    webserver_thread = Thread(target = start_webserver)
+
+    webserver_thread.start()
+    queue_listener_thread.start()
+    lights_thread.start()
 
 if __name__ == "__main__" :
     main()
