@@ -1,19 +1,20 @@
 <script>
 import { onMount } from 'svelte';
 import LED from './LED.svelte';
+import { statusEnum, connectionStatus } from './stores.js';
 
-let statusMsg = 'Connecting...';
 let hello = '';
 
 function connectWebSocket() {
     const socket = new WebSocket("ws://127.0.0.1:8756/lightsocket");
     socket.addEventListener('open', function(event) {
-        console.info('Connected to WebSocket')
-        statusMsg = 'Connected';
+        console.info('Connected to WebSocket');
+        $connectionStatus = statusEnum.CONNECTED;
     });
 
     socket.addEventListener('close', function(event) {
-        statusMsg = 'Connecting...'
+        $connectionStatus = statusEnum.DISCONNECTED;
+
         hideAllLeds();
         setTimeout(function() {
             connectWebSocket();
@@ -165,7 +166,6 @@ function resetLeds() {
 </script>
 
 <main>
-    <h1>{statusMsg}</h1>
     <h2>{hello}</h2>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">

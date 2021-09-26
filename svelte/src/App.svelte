@@ -1,8 +1,10 @@
 <script>
 	import MtgTable from "./MtgTable.svelte";
+	import ConnectionStatus from './ConnectionStatus.svelte';
 </script>
 
 <main>
+	<ConnectionStatus />
 	<MtgTable />
 </main>
 
