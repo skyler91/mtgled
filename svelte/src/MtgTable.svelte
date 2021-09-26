@@ -3,9 +3,10 @@ import { onMount } from 'svelte';
 import LED from './LED.svelte';
 
 let statusMsg = 'Connecting...';
+let hello = '';
 
 function connectWebSocket() {
-    const socket = new WebSocket("ws://127.0.0.1:8756");
+    const socket = new WebSocket("ws://127.0.0.1:8756/lightsocket");
     socket.addEventListener('open', function(event) {
         console.info('Connected to WebSocket')
         statusMsg = 'Connected';
@@ -42,7 +43,20 @@ let currPlayer = 0;
 onMount(() => {
     addLeds();
     connectWebSocket();
+    getHelloWorld();
 });
+
+async function getHelloWorld() {
+    console.info('fetching hello');
+    try {
+        const resp = await fetch('http://127.0.0.1:8756/api');
+        console.info(`got ${resp.status}`);
+        const json = await resp.json();
+        hello = await JSON.stringify(json);
+    } catch (exception) {
+        console.info(exception)
+    }
+}
 
 function addLeds() {
     topLeds();
@@ -152,6 +166,7 @@ function resetLeds() {
 
 <main>
     <h1>{statusMsg}</h1>
+    <h2>{hello}</h2>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
             <div class="outerLeftCircle">

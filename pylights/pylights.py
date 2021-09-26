@@ -5,8 +5,6 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 from tornado.options import define, options
-from tornado.platform.asyncio import AsyncIOMainLoop
-from queue import Queue
 from threading import Thread
 import time
 import zmq
@@ -23,11 +21,15 @@ sub_socket.connect('inproc://#1')
 
 clients = []
 global_lights = []
+players = []
 define("port", default=8756, type=int)
 
-class Application(tornado.web.Application):
+class WebServer(tornado.web.Application):
     def __init__(self):
-        handlers = [(r"/", LightsWebSocket)]
+        handlers = [
+            (r"/lightsocket", LightsWebSocket),
+            (r"/api", RestHandler)
+        ]
         super().__init__(handlers, {})
 
     def signal_handler(self, signum, frame):
@@ -58,6 +60,15 @@ class LightsWebSocket(tornado.websocket.WebSocketHandler):
         clients.remove(self)
         print(f"WebSocket closed from {self.request.host}")
 
+class RestHandler(tornado.web.RequestHandler):
+    def set_default_headers(self):
+        self.set_header('Access-Control-Allow-Origin', '*')
+
+    def get(self):
+        self.write(json.dumps({
+            'message': 'hello'
+        }))
+
 def init_random_lights(num_lights):
     lights = []
     for num in range(num_lights):
@@ -73,7 +84,7 @@ def light_changer() :
     num = 1
     while True:
         global_lights = init_random_lights(148)
-        print(f'changing lights')
+        #print(f'changing lights')
         pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(global_lights)}')
         num += 1
         time.sleep(0.5)
@@ -93,17 +104,17 @@ def send_to_websocket(message):
         client.write_message(message)
         # print('wrote message to client')
 
-def start_tornado():
+def start_webserver():
     asyncio.set_event_loop(asyncio.new_event_loop())
     tornado.options.parse_command_line()
-    app = tornado.web.Application([(r"/", LightsWebSocket)])
-    app.listen(8756)
+    app = WebServer()
+    app.listen(options.port)
     tornado.ioloop.IOLoop.current().start()
 
 def main():
     t1 = Thread(target = light_changer)
     t2 = Thread(target = serve)
-    t3 = Thread(target = start_tornado)
+    t3 = Thread(target = start_webserver)
     t3.start()
     t1.start()
     t2.start()
