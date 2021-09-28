@@ -1,6 +1,8 @@
 <script>
 import { onMount } from 'svelte';
 import LED from './LED.svelte';
+import NextTurn from './NextTurn.svelte';
+import StartGame from './StartGame.svelte';
 import { statusEnum, connectionStatus } from './stores.js';
 
 function connectWebSocket() {
@@ -44,18 +46,6 @@ onMount(() => {
     addLeds();
     connectWebSocket();
 });
-
-// async function getHelloWorld() {
-//     console.info('fetching hello');
-//     try {
-//         const resp = await fetch('http://127.0.0.1:8756/api');
-//         console.info(`got ${resp.status}`);
-//         const json = await resp.json();
-//         hello = await JSON.stringify(json);
-//     } catch (exception) {
-//         console.info(exception)
-//     }
-// }
 
 function addLeds() {
     topLeds();
@@ -186,7 +176,8 @@ function resetLeds() {
     </div>
 
     <br /><br />
-    <button type="button" on:click="{nextTurn}" style="visibility:hidden;">Next Turn</button>
+    <NextTurn />
+    <StartGame />
 </main>
 
 <style>
