@@ -1,0 +1,50 @@
+Current setup:
+pub_socket (zmq.PUB):
+    1. Used by webserver handlers
+    2. Used by lights update (lights thread)
+
+pub_socket -> sub_socket (LIGHTS_TOPIC)
+    Used by websocket to send updates to clients
+
+pub_socket -> player_sub_socket (NEXT_TURN_TOPIC)
+    Used to send commands from webserver REST to lights
+
+Threads:
+    - Lights (controller_listener)
+        Listens to player_sub_socket
+        On event:
+            1. calls to update light values array
+            2. sends event to pub_socket with new light updates
+    - Queue Listener (event_subscriber)
+        Listens to sub_socket
+        On event:
+            1. sends message to all clients of websocket (directly)
+    - WebServer
+        Hosts REST and WebSocket endpoints
+        On socket connect:
+            1. Adds client to clients list
+            2. Sends current light status to new client
+        On command:
+            1. Sends command to pub_socket/NEXT_TURN_TOPIC
+
+
+
+
+After refactor:
+Threads/files:
+    1. Light
+        Holds light array
+        Uses zmq.REP to listen for commands:
+            1. Get lights - return current light status
+            2. Update lights - update array and return simple status
+        Uses zmq.PUB to post all light changes
+    2. Webserver
+        Handles websocket connections by updating clients list
+        Gets current light status (zmq.REQ -> light zmq.REP)
+        Sends commands to light (zmq.REQ -> light zmq.REP)
+    3. Light websocket updater
+        Uses zmq.SUB to listen for light changes
+        Writes light changes to webserver clients (share clients list between these threads??)
+    4. Main
+        Holds shared clients array
+        Controls other threads
