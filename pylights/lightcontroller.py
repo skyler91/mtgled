@@ -85,12 +85,11 @@ class LightController(threading.Thread):
         return self.players[next_player_index]
 
     def push_lights(self):
-        print('publishing lights')
         self.light_push_socket.send_json(self.lights)
 
     def next_turn(self):
         self.current_player = self.get_next_player()
-        print(f'current player: {self.current_player}')
+        print(f'current player set to: {self.current_player}')
         self.lights_off()
         self.update_lights(
             list(range(self.player_lights[self.current_player][0], self.player_lights[self.current_player][1])),
@@ -100,23 +99,7 @@ class LightController(threading.Thread):
         self.update_all_lights()
 
     def lights_per_player(self, rgb=(0,0,0), delay=2):
-        print('called lights_per_player')
         self.update_all_lights((0,255,0))
-        # global global_lights
-        # global current_player
-        # current_player = get_next_player()
-        # print(f'current player set to {current_player}')
-        # lights_off()
-        # for l in range(player_lights[current_player][0], player_lights[current_player][1]):
-        #     if rgb[0] == 0 and rgb[1] == 0 and rgb[2] == 0 :
-        #         global_lights[l]['r'] = random.randint(0,255)
-        #         global_lights[l]['g'] = random.randint(0,255)
-        #         global_lights[l]['b'] = random.randint(0,255)
-        #     else:
-        #         global_lights[l]['r'] = rgb[0]
-        #         global_lights[l]['g'] = rgb[1]
-        #         global_lights[l]['b'] = rgb[2]
-        # update_lights()
 
     # Set all lights to random colors
     def lights_random(self) :

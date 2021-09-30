@@ -16,7 +16,5 @@ class WebsocketUpdater(Thread):
         asyncio.set_event_loop(asyncio.new_event_loop())
         while True:
             event = self.light_pull_socket.recv_json()
-            print('got sub event')
             for client in self.clients:
-                print(f'sending update to websocket')
                 client.write_message(json.dumps(event))

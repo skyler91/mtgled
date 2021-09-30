@@ -99,6 +99,5 @@ class StartGameHandler(tornado.web.RequestHandler):
             'command': 'startgame',
             'players': data
         }
-        print(f'post command to queue: {json.dumps(command)}')
         self.light_req_socket.send_json(command)
         self.light_req_socket.recv()
