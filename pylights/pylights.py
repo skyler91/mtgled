@@ -1,33 +1,14 @@
-import json
 import random
 import asyncio
 from lightcontroller import LightController
+from websocketupdater import WebsocketUpdater
 from webserver import WebService
 
-from threading import Thread
 import time
 import zmq
 
-COMMAND_TOPIC = 'command'
-LIGHTS_TOPIC = 'update_lights'
-
+clients = []
 context = zmq.Context()
-# pub_socket = context.socket(zmq.PUB)
-# pub_socket.bind('inproc://#1')
-sub_socket = context.socket(zmq.SUB)
-sub_socket.setsockopt(zmq.SUBSCRIBE, LIGHTS_TOPIC.encode())
-sub_socket.connect('inproc://#1')
-
-global_lights = []
-players = [1, 2, 3, 6]
-current_player = 0
-player_lights = {}
-
-def update_lights():
-    pass
-    #pub_socket.send_string(f'{LIGHTS_TOPIC} {json.dumps(global_lights)}')
-
-
 
 # Set all lights to random colors
 def lights_random(delay=0.5) :
@@ -127,15 +108,16 @@ def main():
     # lights_thread = Thread(target = lights_on_sequential_rgb)
     # lights_thread = Thread(target = blink_lights)
     # lights_thread = Thread(target = lights_per_player)
-    lights = []
 
-    light_controller = LightController(context, lights)
-    webserver = WebService(context, lights)
+    light_controller = LightController(context)
+    webserver = WebService(context, clients)
+    websocket_updater = WebsocketUpdater(context, clients)
 
     #queue_listener_thread = Thread(target = event_subscriber)
 
     light_controller.start()
     webserver.start()
+    websocket_updater.start()
     #queue_listener_thread.start()
 
 if __name__ == "__main__" :
