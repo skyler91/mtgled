@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import random
 import threading
 import time
@@ -32,7 +33,7 @@ class LightController(threading.Thread):
         asyncio.set_event_loop(asyncio.new_event_loop())
         while (True) :
             event =  self.light_rep_socket.recv_json()
-            print(f'got event: {event}')
+            # print(f'got event: {event}')
             if event['command'] == 'getlights':
                 self.light_rep_socket.send_json(self.lights)
             elif event['command'] == 'nextturn':
@@ -56,10 +57,9 @@ class LightController(threading.Thread):
 
     def new_game(self, players):
         self.players = players
+        print(f'starting new game with players {players}')
         self.current_player = 0
-        for i in range(1):
-            self.lights_random()
-            time.sleep(0.5)
+        self.blink_lights()
 
     def update_all_lights(self, rgb=(0,0,0)):
         for light in self.lights:
@@ -100,6 +100,48 @@ class LightController(threading.Thread):
 
     def lights_per_player(self, rgb=(0,0,0), delay=2):
         self.update_all_lights((0,255,0))
+
+    # Light up sequentially as a train, cycle through colors
+    def lights_on_sequential_rgb(self, delay=.02, num_cycles=1, colors = [(255,0,0),(0,255,0),(0,0,255)]):
+        for _ in range(num_cycles):
+            for color in colors:
+                for light in self.lights:
+                    light['r'] = color[0]
+                    light['g'] = color[1]
+                    light['b'] = color[2]
+                    self.push_lights()
+                    time.sleep(delay)
+
+    # Light up one at a time sequentially
+    def lights_on_sequential(self, num_loops = 1, rgb=(255,0,0), delay=0.02):
+        orig_lights = copy.deepcopy(self.lights)
+        for _ in range(num_loops):
+            for i in range(len(self.lights)):
+                self.lights[i]['r'] = rgb[0]
+                self.lights[i]['g'] = rgb[1]
+                self.lights[i]['b'] = rgb[2]
+                self.lights[i-1]['r'] = 0
+                self.lights[i-1]['g'] = 0
+                self.lights[i-1]['b'] = 0
+                self.push_lights()
+                time.sleep(delay)
+        self.lights = orig_lights
+        self.push_lights()
+
+    # Blink all lights together
+    def blink_lights(self, num_blinks = 5, delay=0.4, color=(255,0,0)):
+        orig_lights = copy.deepcopy(self.lights)
+        for _ in range(num_blinks):
+            self.lights_off()
+            for light in self.lights:
+                light['r'] = color[0]
+                light['g'] = color[1]
+                light['b'] = color[2]
+            time.sleep(delay)
+            self.push_lights()
+            time.sleep(delay)
+        self.lights = orig_lights
+        self.push_lights()
 
     # Set all lights to random colors
     def lights_random(self) :

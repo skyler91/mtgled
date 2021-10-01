@@ -1,7 +1,7 @@
 import asyncio
 import json
-from threading import Thread
 import zmq
+from threading import Thread
 
 class WebsocketUpdater(Thread):
     def __init__(self, context, clients):
