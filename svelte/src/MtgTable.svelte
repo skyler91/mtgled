@@ -7,7 +7,7 @@ import { statusEnum, connectionStatus } from './stores.js';
 
 function connectWebSocket() {
     const socketAddr = PYLIGHTS_ADDRESS || '127.0.0.1:8756';
-    const socket = new WebSocket(`ws://${PYLIGHTS_ADDRESS}/lightsocket`);
+    const socket = new WebSocket(`ws://${socketAddr}/lightsocket`);
     socket.addEventListener('open', function(event) {
         console.info('Connected to WebSocket');
         $connectionStatus = statusEnum.CONNECTED;
@@ -26,7 +26,8 @@ function connectWebSocket() {
         const data = event.data;
         const json_data = JSON.parse(data)
         // console.info(`data: ${JSON.stringify(json_data)}`)
-        json_data.forEach((element, index) => {
+        gameInProgress = json_data.status
+        json_data.lights.forEach((element, index) => {
             leds[index].color = `rgb(${element.r},${element.g},${element.b})`;
             leds[index].visible = true;
         });
@@ -37,10 +38,14 @@ function connectWebSocket() {
 let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
 
 const maxLeds = 148;
-const maxPlayers = 6;
-let currentPlayers = [1,2,3,4,5,6];
 let leds = [];
-let currPlayer = 0;
+let gameInProgress;
+let gameStatus = '';
+$: gameStatus = $connectionStatus == statusEnum.CONNECTED
+    ? gameInProgress
+        ? "Game in Progress"
+        : "Start a new game"
+    : "";
 
 onMount(() => {
     addLeds();
@@ -54,11 +59,6 @@ function addLeds() {
     leftLeds();
 
     leds = leds;
-}
-
-function newGame(players) {
-    resetLeds();
-    currentPlayers = players;
 }
 
 function topLeds() {
@@ -120,36 +120,15 @@ function createLed(top, left, player_id, color="red", size=4) {
     leds = [...leds, led];
 }
 
-function nextTurn() {
-    resetLeds();
-
-    do {
-        currPlayer = currPlayer == maxPlayers ? 1 : currPlayer + 1;
-    } while (!currentPlayers.includes(currPlayer));
-
-    console.info(`Player ${currPlayer}'s turn!`);
-    leds.forEach(l => {
-        if (l.player_id === currPlayer)
-        {
-            l.color = 'red';
-            l.visible = true;
-        }
-    });
-    leds = leds;
-}
-
 function hideAllLeds() {
-    leds.forEach(led => led.visible = false);
+    leds.forEach(led => led.visible = false)
     leds = leds;
 }
 
-// reset all LEDs to red
-function resetLeds() {
-    leds.forEach(l => l.visible = false);
-}
 </script>
 
 <main>
+    <h1 class="gameStatus">{gameStatus}</h1>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
             <div class="outerLeftCircle">
@@ -241,5 +220,12 @@ function resetLeds() {
     position: absolute;
     top: 36px;
     left: 176px;
+}
+
+.gameStatus {
+    height: 50px;
+    width: 100%;
+    text-align: center;
+    visibility: visible;
 }
 </style>

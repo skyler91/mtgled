@@ -100,4 +100,4 @@ class StartGameHandler(tornado.web.RequestHandler):
             'players': data
         }
         self.light_req_socket.send_json(command)
-        self.light_req_socket.recv()
+        self.write(self.light_req_socket.recv_json())

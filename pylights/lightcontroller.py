@@ -19,6 +19,7 @@ class LightController(threading.Thread):
 
         self.players = []
         self.current_player = 0
+        self.game_in_progress = False
 
         self.lights = self.init_lights()
         self.player_lights = {
@@ -35,15 +36,24 @@ class LightController(threading.Thread):
             event =  self.light_rep_socket.recv_json()
             # print(f'got event: {event}')
             if event['command'] == 'getlights':
-                self.light_rep_socket.send_json(self.lights)
+                self.light_rep_socket.send_json({
+                    'status': self.game_in_progress,
+                    'lights': self.lights
+                })
             elif event['command'] == 'nextturn':
                 self.next_turn()
-                self.light_rep_socket.send_json(self.lights)
+                self.light_rep_socket.send_json({
+                    'status': self.game_in_progress,
+                    'lights': self.lights
+                })
             elif event['command'] == 'startgame':
                 self.new_game(event['players'])
-                self.light_rep_socket.send_json(self.lights)
+                self.light_rep_socket.send_json({
+                    'status': self.game_in_progress,
+                    'lights': self.lights
+                    })
             else:
-                self.light_rep_socket.send_json({'result': 'failed'})
+                self.light_rep_socket.send_json({'status': f'invalid command: {event.get("command")}'})
 
     def init_lights(self, rgb=(0,0,0)):
         lights = []
@@ -60,6 +70,8 @@ class LightController(threading.Thread):
         print(f'starting new game with players {players}')
         self.current_player = 0
         self.blink_lights()
+        self.game_in_progress = True
+        self.next_turn()
 
     def update_all_lights(self, rgb=(0,0,0)):
         for light in self.lights:
@@ -85,7 +97,10 @@ class LightController(threading.Thread):
         return self.players[next_player_index]
 
     def push_lights(self):
-        self.light_push_socket.send_json(self.lights)
+        self.light_push_socket.send_json({
+            'status': self.game_in_progress,
+            'lights': self.lights
+        })
 
     def next_turn(self):
         self.current_player = self.get_next_player()
