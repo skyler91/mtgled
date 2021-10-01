@@ -3,7 +3,25 @@ import { onMount } from 'svelte';
 import LED from './LED.svelte';
 import NextTurn from './NextTurn.svelte';
 import StartGame from './StartGame.svelte';
+import Player from './Player.svelte';
 import { statusEnum, connectionStatus } from './stores.js';
+
+let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
+const maxLeds = 148;
+let leds = [];
+let gameInProgress;
+let gameStatus = '';
+let players = [];
+$: gameStatus = $connectionStatus == statusEnum.CONNECTED
+    ? gameInProgress
+        ? "Game in Progress"
+        : "Start a new game"
+    : "";
+
+onMount(() => {
+    addLeds();
+    connectWebSocket();
+});
 
 function connectWebSocket() {
     const socketAddr = PYLIGHTS_ADDRESS || '127.0.0.1:8756';
@@ -35,22 +53,14 @@ function connectWebSocket() {
     });
 }
 
-let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
-
-const maxLeds = 148;
-let leds = [];
-let gameInProgress;
-let gameStatus = '';
-$: gameStatus = $connectionStatus == statusEnum.CONNECTED
-    ? gameInProgress
-        ? "Game in Progress"
-        : "Start a new game"
-    : "";
-
-onMount(() => {
-    addLeds();
-    connectWebSocket();
-});
+function handleMessage(event) {
+    if (!players.includes(event.detail.player)) {
+        console.info(`Adding Player ${event.detail.player} to the game!`);
+        players.push(event.detail.player);
+    } else {
+        console.info(`Player ${event.detail.player} is already in the game!`);
+    }
+}
 
 function addLeds() {
     topLeds();
@@ -125,12 +135,26 @@ function hideAllLeds() {
     leds = leds;
 }
 
+function isPlayerVisible(playerNumber) {
+    if (!gameStatus) {
+        return true;
+    }
+
+    return
+}
+
 </script>
 
 <main>
     <h1 class="gameStatus">{gameStatus}</h1>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
+        <Player on:message={handleMessage} name='player1' number=1 lights={leds.slice(0, 25)} visible={isPlayerVisible(1)} />
+        <Player on:message={handleMessage} name='player2' number=2 lights={leds.slice(25,50)} color='blue' visible={isPlayerVisible(2)} />
+        <Player on:message={handleMessage} name='player3' number=3 lights={leds.slice(50,74)} color='brown' visible={isPlayerVisible(3)} />
+        <Player on:message={handleMessage} name='player4' number=4 lights={leds.slice(74,99)} color='green' visible={isPlayerVisible(4)} />
+        <Player on:message={handleMessage} name='player5' number=5 lights={leds.slice(99,124)} color='cornflowerblue' visible={isPlayerVisible(5)} />
+        <Player on:message={handleMessage} name='player6' number=6 lights={leds.slice(124,148)} color='purple' visible={isPlayerVisible(6)} />
             <div class="outerLeftCircle">
                 <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
                     {#each leds.filter(l => l.player_id === 6) as led}
@@ -156,7 +180,7 @@ function hideAllLeds() {
 
     <br /><br />
     <NextTurn />
-    <StartGame />
+    <StartGame players={players} />
 </main>
 
 <style>

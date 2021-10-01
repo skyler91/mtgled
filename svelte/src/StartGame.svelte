@@ -1,8 +1,10 @@
 <script>
+    export let players = [];
+
     async function startGame() {
         const resp = await fetch('http://127.0.0.1:8756/api/startgame', {
             method: 'POST',
-            body: JSON.stringify([1,2,4,5])
+            body: JSON.stringify(players.sort())
         });
     }
 </script>

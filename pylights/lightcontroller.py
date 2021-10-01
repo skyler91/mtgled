@@ -66,7 +66,8 @@ class LightController(threading.Thread):
         return lights
 
     def new_game(self, players):
-        self.players = players
+        # Ensure player numbers are integers
+        self.players = list(map(lambda p : int(p), players))
         print(f'starting new game with players {players}')
         self.current_player = 0
         self.blink_lights()
