@@ -67,7 +67,7 @@ class LightController(threading.Thread):
 
     def new_game(self, players):
         # Ensure player numbers are integers
-        self.players = list(map(lambda p : int(p), players))
+        self.players = players
         print(f'starting new game with players {players}')
         self.current_player = 0
         self.blink_lights()
@@ -111,10 +111,13 @@ class LightController(threading.Thread):
 
     def next_turn(self):
         self.current_player = self.get_next_player()
+        current_player_lights = self.player_lights[self.current_player["number"]]
         print(f'current player set to: {self.current_player}')
         self.lights_off()
         self.update_lights(
-            list(range(self.player_lights[self.current_player][0], self.player_lights[self.current_player][1])),
+            list(range(
+                current_player_lights[0],
+                current_player_lights[1])),
             (0,255,0))
 
     def lights_off(self) :

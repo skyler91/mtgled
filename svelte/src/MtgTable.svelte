@@ -53,13 +53,25 @@ function connectWebSocket() {
     });
 }
 
-function handleMessage(event) {
-    if (!players.includes(event.detail.player)) {
-        console.info(`Adding Player ${event.detail.player} to the game!`);
-        players = [...players, event.detail.player].sort()
-    } else {
-        console.info(`Player ${event.detail.player} is already in the game!`);
+function handleAddPlayer(event) {
+    const playerObj = event.detail;
+    if (!playerObj.name || !playerObj.number || !playerObj.color
+        || playerObj.lightStart == undefined || playerObj.lightEnd == undefined) {
+        console.error(`Failed to add player (missing info): ${JSON.stringify(playerObj)}`);
+        return;
     }
+
+    if (players.find(p => p.number == playerObj.number)) {
+        console.warn(`Player ${player.number} is already in the game`);
+        return;
+    }
+
+
+    players = [...players, playerObj].sort((a,b) => {
+        if (a < b) return -1;
+        if (b > b) return 1;
+        if (a == b) return 0;
+    });
 }
 
 function addLeds() {
@@ -147,15 +159,15 @@ function isPlayerVisible(playerNumber) {
 
 <main>
     <h1 class="gameStatus">{gameStatus}</h1>
-    <div>Players: {players}</div>
+    <div>Players: {JSON.stringify(players)}</div>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
-        <Player on:message={handleMessage} name='player1' number={1} lights={leds.slice(0, 25)} visible={isPlayerVisible(1)} />
-        <Player on:message={handleMessage} name='player2' number={2} lights={leds.slice(25,50)} color='#0000ff' visible={isPlayerVisible(2)} />
-        <Player on:message={handleMessage} name='player3' number={3} lights={leds.slice(50,74)} color='#964B00' visible={isPlayerVisible(3)} />
-        <Player on:message={handleMessage} name='player4' number={4} lights={leds.slice(74,99)} color='#00ff00' visible={isPlayerVisible(4)} />
-        <Player on:message={handleMessage} name='player5' number={5} lights={leds.slice(99,124)} color='#6495ED' visible={isPlayerVisible(5)} />
-        <Player on:message={handleMessage} name='player6' number={6} lights={leds.slice(124,148)} color='#800080' visible={isPlayerVisible(6)} />
+        <Player on:addPlayer={handleAddPlayer} name='player1' number={1} lightStart={0} lightEnd={24} visible={isPlayerVisible(1)} />
+        <Player on:addPlayer={handleAddPlayer} name='player2' number={2} lightStart={25} lightEnd={49} color='#0000ff' visible={isPlayerVisible(2)} />
+        <Player on:addPlayer={handleAddPlayer} name='player3' number={3} lightStart={51} lightEnd={73} color='#964B00' visible={isPlayerVisible(3)} />
+        <Player on:addPlayer={handleAddPlayer} name='player4' number={4} lightStart={74} lightEnd={98} color='#00ff00' visible={isPlayerVisible(4)} />
+        <Player on:addPlayer={handleAddPlayer} name='player5' number={5} lightStart={99} lightEnd={123} color='#6495ED' visible={isPlayerVisible(5)} />
+        <Player on:addPlayer={handleAddPlayer} name='player6' number={6} lightStart={124} lightEnd={147} color='#800080' visible={isPlayerVisible(6)} />
             <div class="outerLeftCircle">
                 <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
                     {#each leds.filter(l => l.player_id === 6) as led}

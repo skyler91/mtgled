@@ -5,7 +5,8 @@
     export let name = '';
     export let color = '#ff0000';
     export let number = 0;
-    export let lights = [];
+    export let lightStart = 0;
+    export let lightEnd = 0;
     export let visible = false;
     export let inGame = false;
     const dispatch = createEventDispatcher();
@@ -52,9 +53,13 @@
     }
 
     function addPlayer() {
-        console.info(`addplayer event`);
-        dispatch('message', {
-            player: number
+        console.info(`addPlayer event`);
+        dispatch('addPlayer', {
+            name: name,
+            number: number,
+            color: color,
+            lightStart: lightStart,
+            lightEnd: lightEnd
         });
     }
 
