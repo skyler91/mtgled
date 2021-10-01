@@ -4,6 +4,7 @@ import LED from './LED.svelte';
 import NextTurn from './NextTurn.svelte';
 import StartGame from './StartGame.svelte';
 import Player from './Player.svelte';
+import ResetGame from './ResetGame.svelte';
 import { statusEnum, connectionStatus } from './stores.js';
 import { playersDefault } from './players'
 
@@ -12,7 +13,8 @@ const maxLeds = 148;
 let leds = [];
 let gameInProgress;
 let gameStatus = '';
-let players = [];
+let allPlayers = playersDefault;
+let activePlayers = [];
 $: gameStatus = $connectionStatus == statusEnum.CONNECTED
     ? gameInProgress
         ? "Game in Progress"
@@ -51,8 +53,8 @@ function connectWebSocket() {
             leds[index].visible = true;
         });
         if (json_data.players) {
-            console.info(`Updating players from backend: ${JSON.stringify(json_data.players)}`);
-            players = json_data.players;
+            // console.info(`Updating players from backend: ${JSON.stringify(json_data.players)}`);
+            activePlayers = json_data.players;
         }
         leds = leds
     });
@@ -66,13 +68,13 @@ function handleAddPlayer(event) {
         return;
     }
 
-    if (players.find(p => p.number == playerObj.number)) {
-        console.warn(`Player ${player.number} is already in the game`);
+    if (activePlayers.find(p => p.number == playerObj.number)) {
+        console.warn(`Player ${playerObj.number} is already in the game`);
         return;
     }
 
     playerObj.inGame = true;
-    players = [...players, playerObj].sort((a,b) => {
+    activePlayers = [...activePlayers, playerObj].sort((a,b) => {
         if (a.number < b.number) return -1;
         if (a.number > b.number) return 1;
         if (a.number == b.number) return 0;
@@ -164,10 +166,10 @@ function isPlayerVisible(playerNumber) {
 
 <main>
     <h1 class="gameStatus">{gameStatus}</h1>
-    <div>Players: {JSON.stringify(players)}</div>
+    <div>Players: {JSON.stringify(activePlayers)}</div>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
-        {#each playersDefault as p}
+        {#each allPlayers as p}
             <Player on:addPlayer={handleAddPlayer} player={p} />
         {/each}
             <div class="outerLeftCircle">
@@ -194,8 +196,12 @@ function isPlayerVisible(playerNumber) {
     </div>
 
     <br /><br />
-    <NextTurn />
-    <StartGame players={players} />
+    {#if gameInProgress}
+        <NextTurn />
+        <ResetGame />
+    {:else}
+        <StartGame players={activePlayers} />
+    {/if}
 </main>
 
 <style>
