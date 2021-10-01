@@ -94,6 +94,21 @@ class StartGameHandler(tornado.web.RequestHandler):
 
     def post(self):
         data = tornado.escape.json_decode(self.request.body)
+        if not data:
+            self.write({
+                'error': f'invalid request body: {data}'
+            })
+            return
+        if not isinstance(data, list):
+            self.write({
+                'error': f'request body is not an array: {data}'
+            })
+            return
+        if len(data) < 2:
+            self.write({
+                'error': f'at least two players are required to start a new game: {data}'
+            })
+            return
         print(f'starting new game: {data}')
         command = {
             'command': 'startgame',
