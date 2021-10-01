@@ -150,11 +150,11 @@ function isPlayerVisible(playerNumber) {
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
         <Player on:message={handleMessage} name='player1' number=1 lights={leds.slice(0, 25)} visible={isPlayerVisible(1)} />
-        <Player on:message={handleMessage} name='player2' number=2 lights={leds.slice(25,50)} color='blue' visible={isPlayerVisible(2)} />
-        <Player on:message={handleMessage} name='player3' number=3 lights={leds.slice(50,74)} color='brown' visible={isPlayerVisible(3)} />
-        <Player on:message={handleMessage} name='player4' number=4 lights={leds.slice(74,99)} color='green' visible={isPlayerVisible(4)} />
-        <Player on:message={handleMessage} name='player5' number=5 lights={leds.slice(99,124)} color='cornflowerblue' visible={isPlayerVisible(5)} />
-        <Player on:message={handleMessage} name='player6' number=6 lights={leds.slice(124,148)} color='purple' visible={isPlayerVisible(6)} />
+        <Player on:message={handleMessage} name='player2' number=2 lights={leds.slice(25,50)} color='#0000ff' visible={isPlayerVisible(2)} />
+        <Player on:message={handleMessage} name='player3' number=3 lights={leds.slice(50,74)} color='#964B00' visible={isPlayerVisible(3)} />
+        <Player on:message={handleMessage} name='player4' number=4 lights={leds.slice(74,99)} color='#00ff00' visible={isPlayerVisible(4)} />
+        <Player on:message={handleMessage} name='player5' number=5 lights={leds.slice(99,124)} color='#6495ED' visible={isPlayerVisible(5)} />
+        <Player on:message={handleMessage} name='player6' number=6 lights={leds.slice(124,148)} color='#800080' visible={isPlayerVisible(6)} />
             <div class="outerLeftCircle">
                 <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
                     {#each leds.filter(l => l.player_id === 6) as led}

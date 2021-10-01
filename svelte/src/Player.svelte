@@ -1,8 +1,9 @@
 <script>
     import { createEventDispatcher } from 'svelte';
+    import ColorPicker from './ColorPicker.svelte';
 
     export let name = '';
-    export let color = 'red';
+    export let color = '#ff0000';
     export let number = 0;
     export let lights = [];
     export let visible = false;
@@ -56,12 +57,14 @@
             player: number
         });
     }
+
 </script>
 
 {#if visible}
 <div class="player" style="left:{location.x}; top: {location.y}; background-color: {color};">
     <div class="description">Name: {name}</div>
     <div class="description">Light Color: {color}</div>
+    <ColorPicker bind:colorHex={color} />
     <button on:click={addPlayer}>Add</button>
 </div>
 {/if}
