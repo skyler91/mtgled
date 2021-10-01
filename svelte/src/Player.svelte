@@ -2,17 +2,12 @@
     import { createEventDispatcher } from 'svelte';
     import ColorPicker from './ColorPicker.svelte';
 
-    export let name = '';
-    export let color = '#ff0000';
-    export let number = 0;
-    export let lightStart = 0;
-    export let lightEnd = 0;
-    export let visible = false;
-    export let inGame = false;
+    export let player;
+
     const dispatch = createEventDispatcher();
     let location;
     $: {
-        switch(parseInt(number)) {
+        switch(parseInt(player.number)) {
             case 1:
                 location = {
                     x: '-5px',
@@ -48,31 +43,28 @@
                     x: '-345px',
                     y: '120px'
                 }
-                break;;
+                break;
         }
     }
 
     function addPlayer() {
-        console.info(`addPlayer event`);
         dispatch('addPlayer', {
-            name: name,
-            number: number,
-            color: color,
-            lightStart: lightStart,
-            lightEnd: lightEnd
+            name: player.name,
+            number: player.number,
+            color: player.color,
+            lightStart: player.lightStart,
+            lightEnd: player.lightEnd
         });
     }
 
 </script>
 
-{#if visible}
-<div class="player" style="left:{location.x}; top: {location.y}; background-color: {color};">
-    <div class="description">Name: {name}</div>
-    <div class="description">Light Color: {color}</div>
-    <ColorPicker bind:colorHex={color} />
+<div class="player" style="left:{location.x}; top: {location.y}; background-color: {player.color};">
+    <div class="description">Name: {player.name}</div>
+    <div class="description">Light Color: {player.color}</div>
+    <ColorPicker bind:colorHex={player.color} />
     <button on:click={addPlayer}>Add</button>
 </div>
-{/if}
 
 <style>
     .player {

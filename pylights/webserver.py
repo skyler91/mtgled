@@ -39,7 +39,8 @@ class WebServer(tornado.web.Application):
                 'light_req_socket': self.light_req_socket}),
             (r"/api", RestHandler),
             (r"/api/nextturn", NextTurnHandler, {'light_req_socket': self.light_req_socket}),
-            (r"/api/startgame", StartGameHandler, {'light_req_socket': self.light_req_socket})
+            (r"/api/startgame", StartGameHandler, {'light_req_socket': self.light_req_socket}),
+            (r"/api/resetgame", ResetGameHandler, {'light_req_socket': self.light_req_socket})
         ]
         super().__init__(handlers, {})
 
@@ -113,6 +114,20 @@ class StartGameHandler(tornado.web.RequestHandler):
         command = {
             'command': 'startgame',
             'players': data
+        }
+        self.light_req_socket.send_json(command)
+        self.write(self.light_req_socket.recv_json())
+
+class ResetGameHandler(tornado.web.RequestHandler):
+    def initialize(self, light_req_socket):
+        self.light_req_socket = light_req_socket
+
+    def set_default_headers(self):
+        self.set_header('Access-Control-Allow-Origin', '*')
+
+    def get(self):
+        command = {
+            'command': 'resetgame'
         }
         self.light_req_socket.send_json(command)
         self.write(self.light_req_socket.recv_json())

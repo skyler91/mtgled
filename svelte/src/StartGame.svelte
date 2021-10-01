@@ -2,7 +2,7 @@
     export let players = [];
 
     async function startGame() {
-        console.info(`Starting a new game with players: ${players}`);
+        console.info(`Starting a new game with players: ${JSON.stringify(players)}`);
         const resp = await fetch('http://127.0.0.1:8756/api/startgame', {
             method: 'POST',
             body: JSON.stringify(players.sort())

@@ -5,6 +5,7 @@ import NextTurn from './NextTurn.svelte';
 import StartGame from './StartGame.svelte';
 import Player from './Player.svelte';
 import { statusEnum, connectionStatus } from './stores.js';
+import { playersDefault } from './players'
 
 let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
 const maxLeds = 148;
@@ -43,12 +44,16 @@ function connectWebSocket() {
     socket.addEventListener('message', function(event) {
         const data = event.data;
         const json_data = JSON.parse(data)
-        // console.info(`data: ${JSON.stringify(json_data)}`)
+        console.info(JSON.stringify(event))
         gameInProgress = json_data.status
         json_data.lights.forEach((element, index) => {
             leds[index].color = element;
             leds[index].visible = true;
         });
+        if (json_data.players) {
+            console.info(`Updating players from backend: ${JSON.stringify(json_data.players)}`);
+            players = json_data.players;
+        }
         leds = leds
     });
 }
@@ -66,11 +71,11 @@ function handleAddPlayer(event) {
         return;
     }
 
-
+    playerObj.inGame = true;
     players = [...players, playerObj].sort((a,b) => {
-        if (a < b) return -1;
-        if (b > b) return 1;
-        if (a == b) return 0;
+        if (a.number < b.number) return -1;
+        if (a.number > b.number) return 1;
+        if (a.number == b.number) return 0;
     });
 }
 
@@ -162,12 +167,9 @@ function isPlayerVisible(playerNumber) {
     <div>Players: {JSON.stringify(players)}</div>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
-        <Player on:addPlayer={handleAddPlayer} name='player1' number={1} lightStart={0} lightEnd={24} visible={isPlayerVisible(1)} />
-        <Player on:addPlayer={handleAddPlayer} name='player2' number={2} lightStart={25} lightEnd={49} color='#0000ff' visible={isPlayerVisible(2)} />
-        <Player on:addPlayer={handleAddPlayer} name='player3' number={3} lightStart={51} lightEnd={73} color='#964B00' visible={isPlayerVisible(3)} />
-        <Player on:addPlayer={handleAddPlayer} name='player4' number={4} lightStart={74} lightEnd={98} color='#00ff00' visible={isPlayerVisible(4)} />
-        <Player on:addPlayer={handleAddPlayer} name='player5' number={5} lightStart={99} lightEnd={123} color='#6495ED' visible={isPlayerVisible(5)} />
-        <Player on:addPlayer={handleAddPlayer} name='player6' number={6} lightStart={124} lightEnd={147} color='#800080' visible={isPlayerVisible(6)} />
+        {#each playersDefault as p}
+            <Player on:addPlayer={handleAddPlayer} player={p} />
+        {/each}
             <div class="outerLeftCircle">
                 <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
                     {#each leds.filter(l => l.player_id === 6) as led}
