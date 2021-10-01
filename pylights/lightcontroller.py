@@ -38,19 +38,19 @@ class LightController(threading.Thread):
             if event['command'] == 'getlights':
                 self.light_rep_socket.send_json({
                     'status': self.game_in_progress,
-                    'lights': self.lights
+                    'lights': self.rgb_to_hex()
                 })
             elif event['command'] == 'nextturn':
                 self.next_turn()
                 self.light_rep_socket.send_json({
                     'status': self.game_in_progress,
-                    'lights': self.lights
+                    'lights': self.rgb_to_hex()
                 })
             elif event['command'] == 'startgame':
                 self.new_game(event['players'])
                 self.light_rep_socket.send_json({
                     'status': self.game_in_progress,
-                    'lights': self.lights
+                    'lights': self.rgb_to_hex()
                     })
             else:
                 self.light_rep_socket.send_json({'status': f'invalid command: {event.get("command")}'})
@@ -97,10 +97,16 @@ class LightController(threading.Thread):
             next_player_index = 0
         return self.players[next_player_index]
 
+    def rgb_to_hex(self):
+        hex_lights = []
+        for light in self.lights:
+            hex_lights.append('#%02x%02x%02x' % (light['r'], light['g'], light['b']))
+        return hex_lights
+
     def push_lights(self):
         self.light_push_socket.send_json({
             'status': self.game_in_progress,
-            'lights': self.lights
+            'lights': self.rgb_to_hex()
         })
 
     def next_turn(self):

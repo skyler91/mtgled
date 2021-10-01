@@ -46,7 +46,7 @@ function connectWebSocket() {
         // console.info(`data: ${JSON.stringify(json_data)}`)
         gameInProgress = json_data.status
         json_data.lights.forEach((element, index) => {
-            leds[index].color = `rgb(${element.r},${element.g},${element.b})`;
+            leds[index].color = element;
             leds[index].visible = true;
         });
         leds = leds
