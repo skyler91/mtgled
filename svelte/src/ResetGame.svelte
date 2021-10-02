@@ -1,11 +1,9 @@
 <script>
-    async function resetGame() {
-        console.info(`Resetting game`);
-        const resp = await fetch('http://127.0.0.1:8756/api/resetgame');
-        const resp_json = await resp.json()
-        if (resp_json.error) {
-            console.error(`Got error when starting new game: ${resp_json.error}`);
-        }
+    import { allPlayers } from './stores.js';
+    import { playersDefault } from './players.js';
+
+    function resetGame() {
+        $allPlayers = JSON.parse(JSON.stringify(playersDefault));
     }
 </script>
 

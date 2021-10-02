@@ -40,7 +40,7 @@ class WebServer(tornado.web.Application):
             (r"/api", RestHandler),
             (r"/api/nextturn", NextTurnHandler, {'light_req_socket': self.light_req_socket}),
             (r"/api/startgame", StartGameHandler, {'light_req_socket': self.light_req_socket}),
-            (r"/api/resetgame", ResetGameHandler, {'light_req_socket': self.light_req_socket})
+            (r"/api/resetgame", ResetGameHandler, {'light_req_socket': self.light_req_socket}),
         ]
         super().__init__(handlers, {})
 

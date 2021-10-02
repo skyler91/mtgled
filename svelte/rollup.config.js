@@ -75,7 +75,8 @@ export default {
 
 		// Replace environment variables
 		replace({
-			PYLIGHTS_ADDRESS: JSON.stringify(process.env.PYLIGHTS_ADDRESS)
+			PYLIGHTS_ADDRESS: JSON.stringify(process.env.PYLIGHTS_ADDRESS),
+			preventAssignment: true
 		}),
 	],
 	watch: {

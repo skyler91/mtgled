@@ -4,19 +4,15 @@ import LED from './LED.svelte';
 import NextTurn from './NextTurn.svelte';
 import StartGame from './StartGame.svelte';
 import Player from './Player.svelte';
+import EndGame from './EndGame.svelte';
 import ResetGame from './ResetGame.svelte';
-import { statusEnum, connectionStatus } from './stores.js';
-import { playersDefault } from './players'
+import { statusEnum, connectionStatus, allPlayers, gameInProgress } from './stores.js';
 
 let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
 const maxLeds = 148;
 let leds = [];
-let gameInProgress;
-let gameStatus = '';
-let allPlayers = playersDefault;
-let activePlayers = [];
 $: gameStatus = $connectionStatus == statusEnum.CONNECTED
-    ? gameInProgress
+    ? $gameInProgress
         ? "Game in Progress"
         : "Start a new game"
     : "";
@@ -47,14 +43,21 @@ function connectWebSocket() {
         const data = event.data;
         const json_data = JSON.parse(data)
         console.info(JSON.stringify(event))
-        gameInProgress = json_data.status
+        $gameInProgress = json_data.status
         json_data.lights.forEach((element, index) => {
             leds[index].color = element;
             leds[index].visible = true;
         });
         if (json_data.players) {
-            // console.info(`Updating players from backend: ${JSON.stringify(json_data.players)}`);
-            activePlayers = json_data.players;
+            console.info(`Updating players from backend: ${JSON.stringify(json_data.players)}`);
+            json_data.players.forEach((p) => {
+                const matchIdx = $allPlayers.findIndex(m => m.number == p.number);
+                if(matchIdx >= 0 && !$allPlayers[matchIdx].inGame) {
+                    $allPlayers[matchIdx] = p;
+                    $allPlayers[matchIdx].inGame = true;
+                    $allPlayers = $allPlayers;
+                }
+            });
         }
         leds = leds
     });
@@ -68,17 +71,30 @@ function handleAddPlayer(event) {
         return;
     }
 
-    if (activePlayers.find(p => p.number == playerObj.number)) {
+    const matching = $allPlayers.find(p => p.number == playerObj.number);
+    if (matching == null) {
+        console.error(`Could not find player ${JSON.stringify(playerObj)}`);
+        return;
+    }
+
+    if (matching.inGame) {
         console.warn(`Player ${playerObj.number} is already in the game`);
         return;
     }
 
-    playerObj.inGame = true;
-    activePlayers = [...activePlayers, playerObj].sort((a,b) => {
-        if (a.number < b.number) return -1;
-        if (a.number > b.number) return 1;
-        if (a.number == b.number) return 0;
-    });
+    matching.inGame = true;
+    $allPlayers = $allPlayers;
+}
+
+function handleRemovePlayer(event) {
+    const matchingPlayer = $allPlayers.find(p => p.number == event.detail.number);
+    if (matchingPlayer == null) {
+        console.error(`Cannot find player to remove: ${JSON.stringify(event.detail)}`);
+        return;
+    }
+    console.info(`removing ${JSON.stringify(matchingPlayer)}`);
+    matchingPlayer.inGame = false;
+    $allPlayers = $allPlayers;
 }
 
 function addLeds() {
@@ -153,24 +169,17 @@ function hideAllLeds() {
     leds.forEach(led => led.visible = false)
     leds = leds;
 }
-
-function isPlayerVisible(playerNumber) {
-    if (!gameStatus) {
-        return true;
-    }
-
-    return
-}
-
 </script>
 
 <main>
     <h1 class="gameStatus">{gameStatus}</h1>
-    <div>Players: {JSON.stringify(activePlayers)}</div>
+    <div>Players: {JSON.stringify($allPlayers.filter(p => p.inGame))}</div>
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
-        {#each allPlayers as p}
-            <Player on:addPlayer={handleAddPlayer} player={p} />
+        {#each $allPlayers as p}
+            {#if ($gameInProgress && p.inGame) || !$gameInProgress}
+                <Player on:addPlayer={handleAddPlayer} on:removePlayer={handleRemovePlayer} player={p} />
+            {/if}
         {/each}
             <div class="outerLeftCircle">
                 <div class="leftCircle" bind:this={mtgTableLeft} id="mtgTableLeft">
@@ -196,11 +205,12 @@ function isPlayerVisible(playerNumber) {
     </div>
 
     <br /><br />
-    {#if gameInProgress}
+    {#if $gameInProgress}
         <NextTurn />
-        <ResetGame />
+        <EndGame />
     {:else}
-        <StartGame players={activePlayers} />
+        <StartGame players={$allPlayers.filter(p => p.inGame)} />
+        <ResetGame />
     {/if}
 </main>
 

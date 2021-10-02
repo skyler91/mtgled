@@ -1,6 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import ColorPicker from './ColorPicker.svelte';
+    import { gameInProgress } from './stores.js';
 
     export let player;
 
@@ -57,13 +58,26 @@
         });
     }
 
+    function removePlayer() {
+        dispatch('removePlayer', {
+            number: player.number
+        });
+    }
+
+    $: inGameStatus = player.inGame ? "YES" : "NO";
+    $: opacity = (!$gameInProgress && player.inGame) ? 100 : 0;
 </script>
 
-<div class="player" style="left:{location.x}; top: {location.y}; background-color: {player.color};">
+<div class="player" style="left:{location.x}; top: {location.y}; background-color: {player.color}; --player-opacity:{opacity};">
     <div class="description">Name: {player.name}</div>
     <div class="description">Light Color: {player.color}</div>
     <ColorPicker bind:colorHex={player.color} />
-    <button on:click={addPlayer}>Add</button>
+    <div class="description">In Game? {inGameStatus}</div>
+    {#if player.inGame}
+        <button on:click={removePlayer}>Remove</button>
+    {:else}
+        <button on:click={addPlayer}>Add</button>
+    {/if}
 </div>
 
 <style>
@@ -76,7 +90,7 @@
         border-color: transparent;
         border-radius: 1px;
         border-style: solid;
-        opacity: 0;
+        opacity: var(--player-opacity);
     }
 
     .player:hover {

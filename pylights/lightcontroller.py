@@ -77,8 +77,9 @@ class LightController(threading.Thread):
         self.players = players
         print(f'starting new game with players {players}')
         self.current_player = 0
-        self.blink_lights()
         self.game_in_progress = True
+        self.push_lights()
+        self.blink_lights()
         self.next_turn()
 
     # Clear the current game
