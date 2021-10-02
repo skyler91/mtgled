@@ -95,6 +95,8 @@
     $: inGameStatus = player.inGame ? "YES" : "NO";
     $: opacity = (!$gameInProgress && player.inGame) ? 0.9 : 0;
     $: playerBorderColor = player.inGame ? 'green' : 'black';
+    $: colorPickerVisible = colorPickerVisible && !$gameInProgress;
+    $: editName = editName && !$gameInProgress;
 </script>
 
 <div class="player" style="left:{location.x}; top: {location.y}; --player-opacity:{opacity}; --light-color:{player.color}; --player-border-color: {playerBorderColor};">
@@ -111,7 +113,7 @@
         <div class="lightColorPreview" on:click={toggleColorPickerVisibility}></div>
     </div>
 
-    {#if colorPickerVisible}
+    {#if colorPickerVisible && !$gameInProgress}
         <ColorPicker bind:colorHex={player.color} />
     {/if}
 

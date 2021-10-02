@@ -29,7 +29,6 @@
 
         colorPicker.on('color:change', function(newColor) {
             colorHex = newColor.hexString
-            console.log(`color: ${JSON.stringify(colorHex)}`);
         });
     });
 
