@@ -1,6 +1,8 @@
 # mtgled
 MTG table LED project
 
+![Configuration Screenshot](https://i.imgur.com/AYlI8HB.png)
+
 This will be used to control LEDs installed on a card table for Magic: the Gathering multiplayer games.
 
 It consists of a SPA frontend for:
