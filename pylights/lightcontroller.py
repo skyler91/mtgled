@@ -118,6 +118,10 @@ class LightController(threading.Thread):
             hex_lights.append('#%02x%02x%02x' % (light['r'], light['g'], light['b']))
         return hex_lights
 
+    def hex_to_rgb(self, hex_color):
+        hex_color = hex_color.lstrip('#')
+        return tuple(int(hex_color[i:i+2], 16) for i in (0,2,4))
+
     def push_lights(self):
         self.light_push_socket.send_json({
             'status': self.game_in_progress,
@@ -128,13 +132,12 @@ class LightController(threading.Thread):
     def next_turn(self):
         self.current_player = self.get_next_player()
         current_player_lights = self.player_lights[self.current_player["number"]]
-        print(f'current player set to: {self.current_player}')
         self.lights_off()
         self.update_lights(
             list(range(
                 current_player_lights[0],
                 current_player_lights[1])),
-            (0,255,0))
+            self.hex_to_rgb(self.current_player['color']))
 
     def lights_off(self) :
         self.update_all_lights()
