@@ -11,12 +11,20 @@
         colorPicker = new iro.ColorPicker(colorPickerElem, {
             width: 100,
             color: colorHex,
-            // layout: [
-            //     {
-            //         component: iro.ui.Wheel,
-            //         options: {}
-            //     }
-            // ]
+            layout: [
+                {
+                    component: iro.ui.Wheel,
+                    options: {
+                        margin: 3
+                    }
+                },
+                {
+                    component: iro.ui.Slider,
+                    options: {
+                        margin: 3
+                    }
+                }
+            ]
         })
 
         colorPicker.on('color:change', function(newColor) {
