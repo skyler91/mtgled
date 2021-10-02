@@ -173,7 +173,7 @@ function hideAllLeds() {
 
 <main>
     <h1 class="gameStatus">{gameStatus}</h1>
-    <div>Players: {JSON.stringify($allPlayers.filter(p => p.inGame))}</div>
+    <!-- <div>Players: {JSON.stringify($allPlayers.filter(p => p.inGame))}</div> -->
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
         {#each $allPlayers as p}
@@ -205,10 +205,10 @@ function hideAllLeds() {
     </div>
 
     <br /><br />
-    {#if $gameInProgress}
+    {#if $connectionStatus == statusEnum.CONNECTED && $gameInProgress}
         <NextTurn />
         <EndGame />
-    {:else}
+    {:else if $connectionStatus == statusEnum.CONNECTED}
         <StartGame players={$allPlayers.filter(p => p.inGame)} />
         <ResetGame />
     {/if}
@@ -280,7 +280,9 @@ function hideAllLeds() {
 .gameStatus {
     height: 50px;
     width: 100%;
-    text-align: center;
     visibility: visible;
+    margin: auto;
+    margin-bottom: 20px;
+    display: inline-block;
 }
 </style>

@@ -10,7 +10,13 @@
     onMount(() => {
         colorPicker = new iro.ColorPicker(colorPickerElem, {
             width: 100,
-            color: colorHex
+            color: colorHex,
+            // layout: [
+            //     {
+            //         component: iro.ui.Wheel,
+            //         options: {}
+            //     }
+            // ]
         })
 
         colorPicker.on('color:change', function(newColor) {
@@ -28,6 +34,5 @@
     .colorPicker {
         margin: auto;
         width: 100px;
-        padding: 5px;
     }
 </style>

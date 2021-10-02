@@ -18,7 +18,12 @@
 
 <style>
     .container {
-        text-align: left
+        cursor: default;
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+        float: left;
+        padding: 5px;
     }
 
     .statusLight {
@@ -27,6 +32,7 @@
         border-radius: 50%;
         background-color: 'red';
         display: inline-block;
+        vertical-align: center;
     }
 
     .text {
