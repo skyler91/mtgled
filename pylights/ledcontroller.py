@@ -28,12 +28,13 @@ class LedController:
 
 def led_sub_listener(controller):
     context = zmq.Context()
+    socket_address = f"tcp://{os.environ.get('LED_PUB_ADDRESS') or LED_PUB_ADDRESS}:{os.environ.get('LED_PUB_PORT') or LED_PUB_PORT}"
     led_sub_socket = context.socket(zmq.SUB)
     led_sub_socket.setsockopt(zmq.SUBSCRIBE, LED_UPDATE_TOPIC)
-    led_sub_socket.connect(f"tcp://{os.environ.get('LED_PUB_ADDRESS') or LED_PUB_ADDRESS}:{os.environ.get('LED_PUB_PORT') or LED_PUB_PORT}")
+    print(f'Connecting to PUB socket: {socket_address}')
+    led_sub_socket.connect(socket_address)
     while True:
         message = led_sub_socket.recv_multipart()
-        print(f'received message with {len(message)} parts')
         leds = json.loads(message[1].decode('utf-8'))
         print(f'updating LEDs: {leds}')
         controller.update(leds)
