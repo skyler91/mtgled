@@ -15,8 +15,7 @@ class LedController:
         if len(leds) != self.num_lights :
             raise ValueError('LED number mismatch')
 
-        pixels = []
-        for l in leds:
-            pixels.append((l['r'], l['g'], l['b']))
+        for i in range(len(leds)):
+            self.leds[i] = (leds[i]['r'], leds[i]['g'], leds[i]['b'])
 
-        pixels.show()
+        self.leds.show()
