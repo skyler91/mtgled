@@ -3,6 +3,7 @@ import json
 import neopixel
 import os
 import zmq
+from lightcontroller import LED_UPDATE_TOPIC
 
 # GPIO 18
 LED_PIN = board.D18
@@ -28,7 +29,8 @@ class LedController:
 def led_sub_listener(controller):
     context = zmq.Context()
     led_sub_socket = context.socket(zmq.SUB)
-    led_sub_socket.connect(f"{os.environ.get('LED_PUB_ADDRESS') or LED_PUB_ADDRESS}:{os.environ.get('LED_PUB_PORT') or LED_PUB_PORT}")
+    led_sub_socket.setsockopt(zmq.SUBSCRIBE, LED_UPDATE_TOPIC)
+    led_sub_socket.connect(f"tcp://{os.environ.get('LED_PUB_ADDRESS') or LED_PUB_ADDRESS}:{os.environ.get('LED_PUB_PORT') or LED_PUB_PORT}")
     while True:
         message = led_sub_socket.recv_multipart()
         print(f'received message with {len(message)} parts')
@@ -37,5 +39,5 @@ def led_sub_listener(controller):
         controller.update(leds)
 
 if __name__ == "__main__":
-    led_controller = LedController(150, 0.5)
+    led_controller = LedController(148, 0.5)
     led_sub_listener(led_controller)

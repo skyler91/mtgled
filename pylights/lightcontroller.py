@@ -8,6 +8,7 @@ import zmq
 
 NUM_LIGHTS = 148
 LED_PUB_PORT = 8757
+LED_UPDATE_TOPIC = b'ledupdate'
 
 class LightController(threading.Thread):
     def __init__(self, context):
@@ -127,7 +128,7 @@ class LightController(threading.Thread):
         return tuple(int(hex_color[i:i+2], 16) for i in (0,2,4))
 
     def push_lights(self):
-        self.led_pub_socket.send_multipart(["test".encode(), json.dumps(self.lights).encode()])
+        self.led_pub_socket.send_multipart([LED_UPDATE_TOPIC, json.dumps(self.lights).encode()])
         #self.led_controller.update(self.lights)
         self.light_push_socket.send_json({
             'status': self.game_in_progress,
