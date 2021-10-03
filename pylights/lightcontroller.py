@@ -4,6 +4,7 @@ import random
 import threading
 import time
 import zmq
+from ledcontroller import LedController
 
 NUM_LIGHTS = 148
 LIGHTS_TOPIC = 'update_lights'
@@ -11,6 +12,7 @@ LIGHTS_TOPIC = 'update_lights'
 class LightController(threading.Thread):
     def __init__(self, context):
         super(LightController, self).__init__()
+        self.led_controller = LedController(NUM_LIGHTS, 0.5)
         self.context = context
         self.light_rep_socket = context.socket(zmq.REP)
         self.light_rep_socket.bind('inproc://weblights')
@@ -123,6 +125,7 @@ class LightController(threading.Thread):
         return tuple(int(hex_color[i:i+2], 16) for i in (0,2,4))
 
     def push_lights(self):
+        self.led_controller.update(self.lights)
         self.light_push_socket.send_json({
             'status': self.game_in_progress,
             'lights': self.rgb_to_hex(),
