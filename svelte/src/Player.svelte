@@ -119,14 +119,16 @@
 
     <div class="description">In Game? {inGameStatus}</div>
 
-    {#if player.inGame}
-        <div>
-            <button class="addRemoveButtons" on:click={removePlayer}>Remove</button>
-        </div>
-    {:else}
-        <div>
-            <button class="addRemoveButtons" disabled={editName} on:click={addPlayer}>Add</button>
-        </div>
+    {#if !$gameInProgress}
+        {#if player.inGame}
+            <div>
+                <button class="addRemoveButtons" on:click={removePlayer}>Remove</button>
+            </div>
+        {:else}
+            <div>
+                <button class="addRemoveButtons" disabled={editName} on:click={addPlayer}>Add</button>
+            </div>
+        {/if}
     {/if}
 </div>
 

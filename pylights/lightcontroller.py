@@ -1,21 +1,26 @@
 import asyncio
 import copy
+import json
 import random
 import threading
 import time
 import zmq
 
 NUM_LIGHTS = 148
-LIGHTS_TOPIC = 'update_lights'
+LED_PUB_PORT = 8757
+LED_UPDATE_TOPIC = b'ledupdate'
 
 class LightController(threading.Thread):
     def __init__(self, context):
         super(LightController, self).__init__()
+        # self.led_controller = LedController(NUM_LIGHTS, 0.5)
         self.context = context
         self.light_rep_socket = context.socket(zmq.REP)
         self.light_rep_socket.bind('inproc://weblights')
         self.light_push_socket = context.socket(zmq.PUSH)
         self.light_push_socket.bind('inproc://lightstream')
+        self.led_pub_socket = context.socket(zmq.PUB)
+        self.led_pub_socket.bind(f'tcp://*:{LED_PUB_PORT}')
 
         self.players = []
         self.current_player = 0
@@ -78,8 +83,10 @@ class LightController(threading.Thread):
         print(f'starting new game with players {players}')
         self.current_player = 0
         self.game_in_progress = True
-        self.push_lights()
-        self.blink_lights()
+        self.lights_off()
+        for i in range(10):
+            self.lights_random()
+            time.sleep(.2)
         self.next_turn()
 
     # Clear the current game
@@ -123,6 +130,8 @@ class LightController(threading.Thread):
         return tuple(int(hex_color[i:i+2], 16) for i in (0,2,4))
 
     def push_lights(self):
+        self.led_pub_socket.send_multipart([LED_UPDATE_TOPIC, json.dumps(self.lights).encode()])
+        #self.led_controller.update(self.lights)
         self.light_push_socket.send_json({
             'status': self.game_in_progress,
             'lights': self.rgb_to_hex(),
