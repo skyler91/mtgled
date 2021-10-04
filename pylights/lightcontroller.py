@@ -140,6 +140,11 @@ class LightController(threading.Thread):
 
     def next_turn(self):
         self.current_player = self.get_next_player()
+        for p in self.players:
+            if p == self.current_player:
+                p['active'] = True
+            else:
+                p['active'] = False
         current_player_lights = self.player_lights[self.current_player["number"]]
         self.lights_off()
         self.update_lights(

@@ -1,11 +1,13 @@
 <script>
     import { createEventDispatcher } from 'svelte';
+    import { fade } from 'svelte/transition';
     import ColorPicker from './ColorPicker.svelte';
     import { gameInProgress } from './stores.js';
 
     export let player;
     let colorPickerVisible = false;
     let editName = false;
+    let visible = false;
 
     const dispatch = createEventDispatcher();
     let location;
@@ -91,63 +93,84 @@
         editName = false;
     }
 
+    function mouseEnter() {
+        if (!visible && (!$gameInProgress || ($gameInProgress && player.inGame))) {
+            visible = true;
+        }
+    }
+
+    function mouseLeave() {
+        if (visible && ($gameInProgress || (!$gameInProgress && !player.inGame))) {
+            visible = false;
+        }
+    }
+
     $: player, updatePlayer();
     $: inGameStatus = player.inGame ? "YES" : "NO";
-    $: opacity = (!$gameInProgress && player.inGame) ? 0.9 : 0;
+    $: visible = (!$gameInProgress && player.inGame) ? true : false;
     $: playerBorderColor = player.inGame ? 'green' : 'black';
     $: colorPickerVisible = colorPickerVisible && !$gameInProgress;
     $: editName = editName && !$gameInProgress;
 </script>
 
-<div class="player" style="left:{location.x}; top: {location.y}; --player-opacity:{opacity}; --light-color:{player.color}; --player-border-color: {playerBorderColor};">
-    {#if editName && !$gameInProgress}
-        <div class="description">Name: </div>
-        <input type="text" class="nameInput" bind:value={tmpPlayer.name}>
-        <button type="submit" class="updateButton" on:click={commitPlayer}>Update</button>
-    {:else}
-        <div class="description" on:click={onEditName}>Name: {player.name}</div>
-    {/if}
+<div class="container" on:mouseenter={mouseEnter} on:mouseleave={mouseLeave} style="left: {location.x}; top: {location.y};">
+    {#if visible}
+        <div class="player" style="--light-color:{player.color}; --player-border-color: {playerBorderColor};" transition:fade>
+            {#if editName && !$gameInProgress}
+                <div class="description">Name: </div>
+                <input type="text" class="nameInput" bind:value={tmpPlayer.name}>
+                <button type="submit" class="updateButton" on:click={commitPlayer}>Update</button>
+            {:else}
+                <div class="description" on:click={onEditName}>Name: {player.name}</div>
+            {/if}
 
-    <div>
-        <div class="description">Light Color: {player.color}</div>
-        <div class="lightColorPreview" on:click={toggleColorPickerVisibility}></div>
-    </div>
-
-    {#if colorPickerVisible && !$gameInProgress}
-        <ColorPicker bind:colorHex={player.color} />
-    {/if}
-
-    <div class="description">In Game? {inGameStatus}</div>
-
-    {#if !$gameInProgress}
-        {#if player.inGame}
             <div>
-                <button class="addRemoveButtons" on:click={removePlayer}>Remove</button>
+                <div class="description">Light Color: {player.color}</div>
+                <div class="lightColorPreview" on:click={toggleColorPickerVisibility}></div>
             </div>
-        {:else}
-            <div>
-                <button class="addRemoveButtons" disabled={editName} on:click={addPlayer}>Add</button>
-            </div>
-        {/if}
+
+            {#if colorPickerVisible && !$gameInProgress}
+                <ColorPicker bind:colorHex={player.color} />
+            {/if}
+
+            <div class="description">In Game? {inGameStatus}</div>
+
+            {#if !$gameInProgress}
+                {#if player.inGame}
+                    <div>
+                        <button class="addRemoveButtons" on:click={removePlayer}>Remove</button>
+                    </div>
+                {:else}
+                    <div>
+                        <button class="addRemoveButtons" disabled={editName} on:click={addPlayer}>Add</button>
+                    </div>
+                {/if}
+            {/if}
+        </div>
     {/if}
 </div>
 
 <style>
+    .container {
+        height: 250px;
+        width: 335px;
+        position: absolute;
+        z-index: 2;
+    }
+
     .player {
         height: 250px;
         width: 335px;
         background-color: darkblue;
-        position: absolute;
         z-index: 1;
         border-color: var(--player-border-color);
         border-radius: 1px;
         border-style: solid;
-        opacity: var(--player-opacity);
+        opacity: 0.9;
     }
 
     .player:hover {
-        border-color: darkgray;
-        opacity: 0.9;
+        border-color: yellow;
     }
 
     .description {

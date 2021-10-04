@@ -8,7 +8,7 @@ import EndGame from './EndGame.svelte';
 import ResetGame from './ResetGame.svelte';
 import { statusEnum, connectionStatus, allPlayers, gameInProgress } from './stores.js';
 
-let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight;
+let mtgTable, mtgTableCenter, mtgTableLeft, mtgTableRight, activePlayer;
 const maxLeds = 148;
 let leds = [];
 $: gameStatus = $connectionStatus == statusEnum.CONNECTED
@@ -50,6 +50,7 @@ function connectWebSocket() {
         });
         if (json_data.players) {
             console.info(`Updating players from backend: ${JSON.stringify(json_data.players)}`);
+            activePlayer = json_data.players.find(p => p.active === true);
             json_data.players.forEach((p) => {
                 const matchIdx = $allPlayers.findIndex(m => m.number == p.number);
                 if(matchIdx >= 0 && !$allPlayers[matchIdx].inGame) {
@@ -172,7 +173,11 @@ function hideAllLeds() {
 </script>
 
 <main>
-    <h1 class="gameStatus">{gameStatus}</h1>
+    {#if activePlayer}
+        <h1 class="gameStatus">{activePlayer.name}'s turn!</h1>
+    {:else}
+        <h1 class="gameStatus">{gameStatus}</h1>
+    {/if}
     <!-- <div>Players: {JSON.stringify($allPlayers.filter(p => p.inGame))}</div> -->
     <div bind:this={mtgTable} id="mtgTable">
         <div class="tableOuterCenter">
@@ -282,7 +287,7 @@ function hideAllLeds() {
     width: 100%;
     visibility: visible;
     margin: auto;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     display: inline-block;
 }
 </style>

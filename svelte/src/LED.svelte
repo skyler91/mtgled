@@ -5,11 +5,12 @@
 </script>
 
 <style>
-    .led {
-	height: 4px;
-	width: 4px;
-	position: absolute;
+.led {
+    height: 8px;
+    width: 8px;
+    position: absolute;
     transform: translate(-50%, -50%);
+    border-radius: 50%;
 }
 </style>
 
