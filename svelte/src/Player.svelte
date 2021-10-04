@@ -3,6 +3,7 @@
     import { fade } from 'svelte/transition';
     import ColorPicker from './ColorPicker.svelte';
     import { gameInProgress } from './stores.js';
+    import { selectTextOnFocus } from '../scripts/textSelect';
 
     export let player;
     let colorPickerVisible = false;
@@ -12,6 +13,7 @@
     const dispatch = createEventDispatcher();
     let location;
     let tmpPlayer;
+    let nameInputRef;
 
     $: {
         switch(parseInt(player.number)) {
@@ -105,12 +107,24 @@
         }
     }
 
+    function editNameKeypress(event) {
+        if (event.charCode == 13) {
+            commitPlayer();
+        }
+    }
+
     $: player, updatePlayer();
     $: inGameStatus = player.inGame ? "YES" : "NO";
     $: visible = (!$gameInProgress && player.inGame) ? true : false;
     $: playerBorderColor = player.inGame ? 'green' : 'black';
     $: colorPickerVisible = colorPickerVisible && !$gameInProgress;
-    $: editName = editName && !$gameInProgress;
+    $: {
+            editName = editName && !$gameInProgress;
+            if (editName && nameInputRef) {
+                // Focus on name input box (and trigger its text to be selected)
+                nameInputRef.focus();
+            }
+    }
 </script>
 
 <div class="container" on:mouseenter={mouseEnter} on:mouseleave={mouseLeave} style="left: {location.x}; top: {location.y};">
@@ -118,7 +132,7 @@
         <div class="player" style="--light-color:{player.color}; --player-border-color: {playerBorderColor};" transition:fade>
             {#if editName && !$gameInProgress}
                 <div class="description">Name: </div>
-                <input type="text" class="nameInput" bind:value={tmpPlayer.name}>
+                <input type="text" class="nameInput" bind:value={tmpPlayer.name} use:selectTextOnFocus bind:this={nameInputRef} on:keypress={editNameKeypress}>
                 <button type="submit" class="updateButton" on:click={commitPlayer}>Update</button>
             {:else}
                 <div class="description" on:click={onEditName}>Name: {player.name}</div>
