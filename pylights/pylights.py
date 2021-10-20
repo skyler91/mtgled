@@ -1,5 +1,5 @@
 import zmq
-from lightcontroller import LightController
+from gamecontroller import GameController
 from websocketupdater import WebsocketUpdater
 from webserver import WebService
 
@@ -7,7 +7,7 @@ clients = []
 context = zmq.Context()
 
 def main():
-    light_controller = LightController(context)
+    light_controller = GameController(context)
     webserver = WebService(context, clients)
     websocket_updater = WebsocketUpdater(context, clients)
 

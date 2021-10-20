@@ -5,14 +5,25 @@ import random
 import threading
 import time
 import zmq
+from dataclasses import dataclass, asdict
 
 NUM_LIGHTS = 148
 LED_PUB_PORT = 8757
 LED_UPDATE_TOPIC = b'ledupdate'
 
-class LightController(threading.Thread):
+@dataclass
+class Player:
+    name: str
+    number: int
+    color: str
+    lightStart: int
+    lightEnd: int
+    inGame: bool = True
+    active: bool = False
+
+class GameController(threading.Thread):
     def __init__(self, context):
-        super(LightController, self).__init__()
+        super(GameController, self).__init__()
         # self.led_controller = LedController(NUM_LIGHTS, 0.5)
         self.context = context
         self.light_rep_socket = context.socket(zmq.REP)
@@ -79,8 +90,10 @@ class LightController(threading.Thread):
 
     def new_game(self, players):
         # Ensure player numbers are integers
-        self.players = players
-        print(f'starting new game with players {players}')
+        self.players = []
+        for p in players:
+            self.players.append(Player(**p))
+        print(f'starting new game with players {self.players}')
         self.current_player = 0
         self.game_in_progress = True
         self.lights_off()
@@ -135,23 +148,23 @@ class LightController(threading.Thread):
         self.light_push_socket.send_json({
             'status': self.game_in_progress,
             'lights': self.rgb_to_hex(),
-            'players': self.players
+            'players': list(map(lambda x: asdict(x), self.players))
         })
 
     def next_turn(self):
         self.current_player = self.get_next_player()
         for p in self.players:
             if p == self.current_player:
-                p['active'] = True
+                p.active = True
             else:
-                p['active'] = False
-        current_player_lights = self.player_lights[self.current_player["number"]]
+                p.active = False
+        current_player_lights = self.player_lights[self.current_player.number]
         self.lights_off()
         self.update_lights(
             list(range(
                 current_player_lights[0],
                 current_player_lights[1])),
-            self.hex_to_rgb(self.current_player['color']))
+            self.hex_to_rgb(self.current_player.color))
 
     def lights_off(self) :
         self.update_all_lights()
